@@ -1,19 +1,5 @@
 use std::vec;
 
-fn input<T>() -> Vec<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
-{
-    let mut buf = String::new();
-    std::io::stdin()
-        .read_line(&mut buf)
-        .expect("Failed to read");
-    buf.split_ascii_whitespace()
-        .map(|t| String::from(t).parse::<T>().unwrap())
-        .collect::<Vec<T>>()
-}
-
 type C = Vec<i32>;
 
 fn add(a: &C, b: &C) -> C {
@@ -33,7 +19,7 @@ fn main() {
         a.push(input::<i32>());
     }
 
-    let id = vec![0 as i32; 301];
+    let id: C = vec![0 as i32; 301];
 
     let mut p = vec![vec![id.clone(); w]; h];
     for r in 0..h {
@@ -73,4 +59,18 @@ fn main() {
         }
         println!();
     }
+}
+
+fn input<T>() -> Vec<T>
+where
+    T: std::str::FromStr,
+    <T as std::str::FromStr>::Err: std::fmt::Debug,
+{
+    let mut buf = String::new();
+    std::io::stdin()
+        .read_line(&mut buf)
+        .expect("Failed to read");
+    buf.split_ascii_whitespace()
+        .map(|t| String::from(t).parse::<T>().unwrap())
+        .collect::<Vec<T>>()
 }

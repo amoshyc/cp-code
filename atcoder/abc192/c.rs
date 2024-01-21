@@ -3,11 +3,15 @@ fn main() {
     let (n, k) = (inp[0], inp[1]);
     let mut a = n;
     for _ in 0..k {
-        let mut s = a.to_string().chars().collect::<Vec<char>>();
-        s.sort();
-        let g1 = s.iter().collect::<String>().parse::<u32>().unwrap();
-        s.reverse();
-        let g2 = s.iter().collect::<String>().parse::<u32>().unwrap();
+        let mut digits = vec![];
+        while a != 0 {
+            digits.push(a % 10);
+            a = a / 10;
+        }
+        digits.sort();
+
+        let g1 = digits.iter().fold(0, |acc, &x| acc * 10 + x);
+        let g2 = digits.iter().rev().fold(0, |acc, &x| acc * 10 + x);
         a = g2 - g1;
     }
     println!("{}", a);

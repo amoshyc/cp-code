@@ -13,17 +13,8 @@ struct SieveOfEratosthenes {
 
     SieveOfEratosthenes(ll V) {
         is_prime = vector<bool>(V + 1, true);
-        primes = vector<ll>({2, 3, 5});
-        for (ll i = 4; i <= V; i += 2) {
-            is_prime[i] = false;
-        }
-        for (ll i = 9; i <= V; i += 3) {
-            is_prime[i] = false;
-        }
-        for (ll i = 25; i <= V; i += 5) {
-            is_prime[i] = false;
-        }
-        for (ll i = 7; i <= V; i += 2) {
+        primes = vector<ll>();
+        for (ll i = 2; i <= V; i ++) {
             if (is_prime[i]) {
                 primes.push_back(i);
                 for (ll j = i * i; j <= V; j += i) {
@@ -34,8 +25,8 @@ struct SieveOfEratosthenes {
     }
 
     vector<pll> factorize(ll x) {
-        if (x == 1) {
-            return {pll(1, 1)};
+        if (x <= 1) {
+            throw invalid_argument("x shoule be > 1");
         }
         auto result = vector<pll>();
         for (auto p : primes) {
@@ -81,8 +72,6 @@ string solve() {
         return "pairwise coprime";
     }
 
-    auto sieve = SieveOfEratosthenes(*max_element(A.begin(), A.end()));
-    auto used_primes = unordered_set<ll>();
 
     ll gcd_all = A[0];
     for (int i = 1; i < N; i++) {
@@ -92,6 +81,9 @@ string solve() {
     if (gcd_all != 1) {
         return "not coprime";
     }
+    
+    auto sieve = SieveOfEratosthenes(*max_element(A.begin(), A.end()));
+    auto used_primes = unordered_set<ll>();
 
     for (auto x : A) {
         if (x == 1) {

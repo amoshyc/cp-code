@@ -1,30 +1,8 @@
-#include <algorithm>
 #include <iostream>
 #include <map>
 #include <set>
 #include <vector>
 using namespace std;
-
-template <class K, class V>
-ostream &operator<<(ostream &out, const map<K, V> m) {
-    out << "Dict(size=" << m.size() << ", ";
-    out << "{ ";
-    for (auto &[k, v] : m) {
-        out << k << ": " << v << ", ";
-    }
-    out << "})";
-    return out;
-}
-
-template <class T> ostream &operator<<(ostream &out, const multiset<T> s) {
-    out << "Set(size=" << s.size() << ", ";
-    out << "{ ";
-    for (auto it = s.begin(); it != s.end(); ++it) {
-        out << *it << " ";
-    }
-    out << "})";
-    return out;
-}
 
 void solve() {
     int H, W;
@@ -56,7 +34,7 @@ void solve() {
         end2start.erase(lb, ub);
 
         // Update pair (b + 1, s)
-        if (b != W - 1 and max_start != -1) {
+        if (b != W - 1 and lb != ub) {
             end2start[b + 1] = max_start;
             steps.insert(b + 1 - end2start[b + 1]);
         }

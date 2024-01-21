@@ -1,63 +1,86 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
-template <class T>
+// 0-based index
+// tree size: 2 * NN - 1
+// leaves indices: [NN - 1, 2 * NN - 1)
+template<class T>
 struct SegTree {
-    int NN;            // tree size: 2 * NN - 1
-    T dflt;            // default val
-    vector<T> seg;     // 0-based index
+    int NN;
+    T default_value;
+    vector<T> data;
 
-    int init(int n, T val) {
-        dflt = val;
-        NN = 1;
-        while (NN < n)
-            NN <<= 1;
-        seg.clear();
-        seg.resize(2 * NN, dflt);
-        return NN;
-    }
-
-    T func(T a, T b) {
+    T aggr(T a, T b) {
         return max(a, b);
     }
 
-    void gather(int u, int l, int r) {
-        seg[u] = func(seg[u * 2 + 1], seg[u * 2 + 2]);
+    SegTree(int N, T val) {
+        default_value = val;
+        NN = 1; while (NN < N) NN <<= 1;
+        data = vector<T>(2 * NN - 1, val);
+    }
+
+    SegTree(const vector<T> v, T val) {
+        default_value = val;
+        int N = v.size();
+        NN = 1; while (NN < N) NN <<= 1;
+        data = vector<T>(2 * NN - 1, val);
+        copy(v.begin(), v.end(), data.begin() + (NN - 1));
+        build(0, 0, NN);
     }
 
     void build(int u, int l, int r) {
-        if (r - l == 1)
-            return;
+        if (r - l == 1) return;
         int m = (l + r) / 2;
         build(u * 2 + 1, l, m);
         build(u * 2 + 2, m, r);
-        gather(u, l, r);
+        data[u] = aggr(data[2 * u + 1], data[2 * u + 2]);
     }
 
     T query(int a, int b, int u, int l, int r) {
         if (l >= b || r <= a)
-            return dflt;
+            return default_value;
         if (l >= a && r <= b)
-            return seg[u];
+            return data[u];
         int m = (l + r) / 2;
         T res1 = query(a, b, u * 2 + 1, l, m);
         T res2 = query(a, b, u * 2 + 2, m, r);
-        return func(res1, res2);
+        return aggr(res1, res2);
     }
 
     void update(int idx, T x, int u, int l, int r) {
         if (idx < l || idx >= r)
             return;
         if (idx == l && r - l == 1) {
-            seg[u] += x;
+            data[u] = x;
             return;
         }
         int m = (l + r) / 2;
         update(idx, x, u * 2 + 1, l, m);
         update(idx, x, u * 2 + 2, m, r);
-        gather(u, l, r);
+        data[u] = aggr(data[2 * u + 1], data[2 * u + 2]);
+    }
+
+    void increment(int idx, T x, int u, int l, int r) {
+        update(idx, data[NN - 1 + idx] + x, u, l, r);
     }
 };
+
+template <class T>
+ostream & operator << (ostream &out, const SegTree<T> &seg) {
+    out << "SegTree(NN=" << seg.NN << ", ";
+    for (int u = seg.NN - 1, sz = seg.NN; sz >= 1; u /= 2, sz /= 2) {
+        out << "[ ";
+        for (int i = 0; i < sz; i++) {
+            out << seg.data[u + i] << " ";
+        }
+        out << "]";
+    }
+    out << ")";
+    return out;
+}
 
 int solve() {
     int H, W, M;
@@ -75,21 +98,18 @@ int solve() {
         t[r].push_back(c);
     }
 
-    auto seg = SegTree<int>();
-    int NN = seg.init(W, 0);
-    copy(cntC.begin(), cntC.end(), seg.seg.begin() + NN - 1);
-    seg.build(0, 0, NN);
-
+    auto seg = SegTree<int>(cntC, 0);
+    // cout << seg << endl;
     int ans = -1;
     for (int r = 0; r < H; r++) {
         for (auto c : t[r]) {
-            seg.update(c, -1, 0, 0, NN);
+            seg.increment(c, -1, 0, 0, seg.NN);
         }
-
-        int val = cntR[r] + seg.query(0, W, 0, 0, NN);
+        // cout << seg << endl;
+        int val = cntR[r] + seg.query(0, W, 0, 0, seg.NN);
         ans = max(ans, val);
         for (auto c : t[r]) {
-            seg.update(c, +1, 0, 0, NN);
+            seg.increment(c, +1, 0, 0, seg.NN);
         }
     }
     return ans;

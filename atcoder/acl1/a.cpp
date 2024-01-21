@@ -6,17 +6,9 @@
 #include <vector>
 using namespace std;
 
-
-template <class K, class V>
-ostream &operator<<(ostream &out, const map<K, V> m) {
-    out << "Dict(size=" << m.size() << ", ";
-    out << "{ ";
-    for (auto &[k, v] : m) {
-        out << k << ": " << v << ", ";
-    }
-    out << "})";
-    return out;
-}
+struct Town {
+    int id, r, c;
+};
 
 int main() {
     ios::sync_with_stdio(false);
@@ -25,7 +17,7 @@ int main() {
     int N;
     cin >> N;
 
-    vector<tuple<int, int, int>> towns(N);
+    vector<Town> towns(N);
     for (int i = 0; i < N; i++) {
         int r, c;
         cin >> r >> c;
@@ -34,31 +26,31 @@ int main() {
         towns[i] = {i, r, c};
     }
 
-    sort(towns.begin(), towns.end(), [](auto town_a, auto town_b) {
-        auto [id1, r1, c1] = town_a;
-        auto [id2, r2, c2] = town_b;
-        return r1 < r2;
-    });
+    sort(towns.begin(), towns.end(),
+         [](auto town_a, auto town_b) { return town_a.r < town_b.r; });
 
     auto components = atcoder::dsu(N);
-    auto pivot_cols = map<int, int>(); // col -> id
+    auto vis = vector<bool>(N, false);
+    int perm = N;
 
-    for (int i = 0; i < N; i++) {
-        auto [cur_id, cur_r, cur_c] = towns[i];
-        auto lb = pivot_cols.lower_bound(cur_c);
-        if (lb == pivot_cols.begin()) {
-            pivot_cols[cur_c] = cur_id;
-        } else {
-            int min_col = cur_c;
-            for (auto it = pivot_cols.begin(); it != lb; ++it) {
-                auto [c, id] = *it;
-                min_col = min(min_col, c);
-                components.merge(cur_id, id);
-            }
-            pivot_cols.erase(pivot_cols.begin(), lb);
-            pivot_cols[min_col] = cur_id;
+    int s = 0;
+    while (s < N) {
+        int t = s + 1;
+        int min_col = towns[s].c;
+        vis[towns[s].c] = true;
+        while (perm >= 1 and vis[perm - 1]) {
+            perm--;
         }
-        // cout << pivot_cols << endl;
+        while (t < N and perm != min_col) {
+            min_col = min(min_col, towns[t].c);
+            vis[towns[t].c] = true;
+            while (perm >= 1 and vis[perm - 1]) {
+                perm--;
+            }
+            components.merge(towns[s].id, towns[t].id);
+            t++;
+        }
+        s = t;
     }
 
     for (int i = 0; i < N; i++) {

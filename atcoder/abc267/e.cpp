@@ -34,32 +34,32 @@ int main() {
             }
         }
 
-        auto stack = vector<int>();
-        auto added = vector<bool>(N, false);
+        auto que = queue<int>();
+        auto rem = vector<bool>(N, false);
         for (int u = 0; u < N; u++) {
             if (C[u] <= m) {
-                stack.push_back(u);
-                added[u] = true;
+                que.push(u);
+                rem[u] = true;
             }
         }
 
-        while (stack.size() > 0) {
-            int u = stack.back();
-            stack.pop_back();
+        while (que.size() > 0) {
+            int u = que.front();
+            que.pop();
 
             for (int v : adj[u]) {
-                if (not added[v]) {
+                if (not rem[v]) {
                     C[v] -= A[u];
                     if (C[v] <= m) {
-                        stack.push_back(v);
-                        added[v] = true;
+                        que.push(v);
+                        rem[v] = true;
                     }
                 }
             }
         }
 
         for (int u = 0; u < N; u++) {
-            if (not added[u]) {
+            if (not rem[u]) {
                 return false;
             }
         }

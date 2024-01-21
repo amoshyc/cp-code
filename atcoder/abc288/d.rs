@@ -5,14 +5,14 @@ fn main() {
     let (n, k) = (inp[0], inp[1]);
     let arr = readv::<i64>();
 
-    let mut pref = vec![vec![0; n]; k];
+    let mut pref = vec![];
     for r in 0..k {
-        for i in 0..n {
-            pref[r][i] = if i > 0 { pref[r][i - 1] } else { 0 };
-            if i % k == r {
-                pref[r][i] += arr[i];
-            }
-        }
+        let x = arr
+            .iter()
+            .enumerate()
+            .map(|(i, &x)| if i % k == r { arr[i] } else { 0 })
+            .collect::<Vec<_>>();
+        pref.push(build(&x));
     }
 
     let q = read::<usize>();
@@ -23,7 +23,7 @@ fn main() {
 
         let mut sum = vec![0; k];
         for r in 0..k {
-            sum[r] = pref[r][b] - if a == 0 { 0 } else { pref[r][a - 1] };
+            sum[r] = query(&pref[r], a, b + 1);
         }
         sum.sort();
         sum.dedup();
@@ -36,6 +36,24 @@ fn main() {
     }
 
     println!("{}", join(&ans, "\n"));
+}
+
+fn build<T: Copy + std::ops::Add<Output = T>>(arr: &[T]) -> Vec<T> {
+    let mut pref = vec![];
+    pref.push(arr[0]);
+    for i in 1..arr.len() {
+        pref.push(pref[i - 1] + arr[i]);
+    }
+    pref
+}
+
+// i..j
+fn query<T: Copy + std::ops::Sub<Output = T>>(pref: &[T], i: usize, j: usize) -> T {
+    let mut res = pref[j - 1];
+    if i > 0 {
+        res = res - pref[i - 1];
+    }
+    res
 }
 
 fn read<T: std::str::FromStr>() -> T {

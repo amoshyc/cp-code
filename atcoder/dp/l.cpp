@@ -4,51 +4,47 @@
 #include <vector>
 using namespace std;
 
+using ll = long long;
+const ll INF = 1e18;
+
+int N;
+ll A[3000];
+ll dp[3000][3000][2];
+
+ll f(int i, int j, bool is_tora) {
+    if (dp[i][j][is_tora] != INF) {
+        return dp[i][j][is_tora];
+    }
+
+    ll res = 0;
+    if (i == j) {
+        res = (is_tora) ? A[i] : -A[i];
+    } else if (is_tora) {
+        res = max(f(i + 1, j, false) + A[i], f(i, j - 1, false) + A[j]);
+    } else {
+        res = min(f(i + 1, j, true) - A[i], f(i, j - 1, true) - A[j]);
+    }
+    
+    dp[i][j][is_tora] = res;
+
+    return res;
+}
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int N;
     cin >> N;
-    vector<int> A(N);
     for (int i = 0; i < N; i++) {
         cin >> A[i];
     }
-
-    using ll = long long;
-    using pii = pair<ll, ll>;
-    auto dp =
-        vector<vector<vector<pii>>>(N, vector<vector<pii>>(N, vector<pii>(2)));
-
     for (int i = 0; i < N; i++) {
-        dp[i][i][1] = {A[i], 0};
-        dp[i][i][0] = {0, A[i]};
-    }
-
-    for (int l = 2; l <= N; l++) {
-        for (int i = 0; i + l <= N; i++) {
-            int j = i + l - 1;
-
-            {
-                auto [X1, Y1] = dp[i + 1][j][0];
-                X1 += A[i];
-                auto [X2, Y2] = dp[i][j - 1][0];
-                X2 += A[j];
-                dp[i][j][1] = ((X1 - Y1 > X2 - Y2) ? pii(X1, Y1) : pii(X2, Y2));
-            }
-
-            {
-                auto [X1, Y1] = dp[i + 1][j][1];
-                Y1 += A[i];
-                auto [X2, Y2] = dp[i][j - 1][1];
-                Y2 += A[j];
-                dp[i][j][0] = ((X1 - Y1 < X2 - Y2) ? pii(X1, Y1) : pii(X2, Y2));
-            }
+        for (int j = 0; j < N; j++) {
+            dp[i][j][0] = INF;
+            dp[i][j][1] = INF;
         }
     }
-
-    auto [X, Y] = dp[0][N - 1][1];
-    cout << X - Y << endl;
+    cout << f(0, N - 1, true) << endl;
 
     return 0;
 }

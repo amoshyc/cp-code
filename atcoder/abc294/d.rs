@@ -9,6 +9,8 @@ fn main() {
     let mut s = BTreeSet::new();
     let mut w = 1;
 
+    let mut ans = vec![];
+
     for _ in 0..q {
         let inp = readv::<usize>();
         let cmd = inp[0];
@@ -23,11 +25,13 @@ fn main() {
                 s.remove(&x);
             },
             3 => {
-                println!("{}", s.iter().next().unwrap());
+                ans.push(s.iter().next().unwrap().clone());
             },
             _ => ()
         }
     }
+
+    println!("{}", join(&ans, "\n"));
 }
 
 // arr.partition_point is added at 1.52.0

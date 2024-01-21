@@ -21,38 +21,19 @@ fn main() {
         d.push(inp[1]);
     }
 
-    let mut must_white = vec![false; n];
-    let mut must_black = vec![false; n];
-
+    let mut color = vec![1; n];
     for i in 0..k {
-        if d[i] == 0 {
-            must_black[p[i]] = true;
-            continue;
-        }
-        let (path, dis) = bfs(&adj, p[i], 1_000_000_000);
+        let (path, _, dis) = bfs(&adj, vec![p[i]]);
         for j in 0..n {
             if dis[j] < d[i] {
-                must_white[j] = true;
+                color[j] = 0;
             }
         }
     }
 
-    let mut ok = true;
-    let mut color = vec![1; n];
-    for i in 0..n {
-        if must_black[i] && must_white[i] {
-            ok = false;
-        }
-        if must_white[i] {
-            color[i] = 0;
-        } else {
-            color[i] = 1;
-        }
-    }
-    ok = ok & color.iter().any(|&c| c == 1);
-
+    let mut ok = color.iter().any(|&c| c == 1);
     for i in 0..k {
-        let (_, dis) = bfs(&adj, p[i], 1_000_000_000);
+        let (_, _, dis) = bfs(&adj, vec![p[i]]);
         ok = ok & (0..n).filter(|&j| dis[j] == d[i]).any(|j| color[j] == 1);
     }
 
@@ -64,23 +45,37 @@ fn main() {
     }
 }
 
-fn bfs(adj: &Vec<Vec<usize>>, root:usize, inf: usize) -> (Vec<usize>, Vec<usize>) {
+fn bfs(adj: &Vec<Vec<usize>>, mut roots: Vec<usize>) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
     let n = adj.len();
-    let mut que = VecDeque::new();
-    let mut dis = vec![inf; n];
-    let mut path = vec![];
-    dis[root] = 0;
-    que.push_back(root);
-    while let Some(u) = que.pop_front() {
-        path.push(u);
-        for &v in adj[u].iter() {
-            if dis[v] == inf {
-                dis[v] = dis[u] + 1;
-                que.push_back(v);
+    let inf = !0;
+    let mut nodes = vec![];
+    let mut parent = vec![inf; n];
+    let mut depth = vec![inf; n];
+    let mut queue = VecDeque::new();
+
+    if roots.len() == 0 {
+        roots.extend(0..n);
+    }
+
+    for root in roots {
+        if parent[root] == inf {
+            parent[root] = root;
+            depth[root] = 0;
+            queue.push_back(root);
+            while let Some(u) = queue.pop_front() {
+                nodes.push(u);
+                for &v in adj[u].iter() {
+                    if parent[v] == inf {
+                        parent[v] = u;
+                        depth[v] = depth[u] + 1;
+                        queue.push_back(v);
+                    }
+                }
             }
         }
     }
-    (path, dis)
+
+    (nodes, parent, depth)
 }
 
 fn read<T: std::str::FromStr>() -> T {

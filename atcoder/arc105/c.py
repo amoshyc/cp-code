@@ -1,6 +1,9 @@
+import sys
 from bisect import bisect_left
 from collections import namedtuple
 from itertools import permutations
+
+input = sys.stdin.readline
 
 N, M = map(int, input().split())
 W = [int(x) for x in input().split()]

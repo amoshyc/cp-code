@@ -1,22 +1,17 @@
 import math
-import numpy as np
 
 class SieveOfEratosthenes:
     def __init__(self, V):
-        self.is_prime = np.ones(V + 1, dtype=bool)
-        self.is_prime[4::2] = False
-        self.is_prime[9::3] = False
-        self.is_prime[25::5] = False
-        self.primes = [2, 3, 5]
-        for i in range(7, V + 1, 2):
+        self.is_prime = [True] * (V + 1)
+        self.primes = []
+        for i in range(2, V + 1):
             if self.is_prime[i]:
                 self.primes.append(i)
-                self.is_prime[i * i::i] = False
+                for j in range(i * i, V + 1, i):
+                    self.is_prime[j] = False
     
     def factorize(self, x):
-        assert x >= 1
-        if x == 1:
-            return [(1, 1)]
+        assert x > 1
         result = []
         for p in self.primes:
             exp = 0

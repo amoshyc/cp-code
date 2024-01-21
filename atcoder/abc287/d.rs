@@ -24,17 +24,19 @@ fn main() {
         suff[n - i] = suff[n - i + 1] && is_matched(s[n - i], t[m - i]);
     }
 
+    let mut ans = vec![];
     for x in 0..=(n - (n - m)) {
         let (s, e) = (x, x + (n - m) - 1); // s..=e
-        let mut ans = true;
+        let mut ok = true;
         if s != 0 && !pref[s - 1] {
-            ans = false;
+            ok = false;
         }
         if e != n - 1 && !suff[e + 1] {
-            ans = false;
+            ok = false;
         }
-        println!("{}", if ans { "Yes" } else { "No" });
+        ans.push(if ok { "Yes" } else { "No" });
     }
+    println!("{}", join(&ans, "\n"));
 }
 
 fn read<T: std::str::FromStr>() -> T {

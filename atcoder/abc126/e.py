@@ -34,7 +34,5 @@ for _ in range(M):
     x, y = x - 1, y - 1
     disjoint.unite(x, y)
 
-roots = set()
-for i in range(N):
-    roots.add(disjoint.root(i))
+roots = set([disjoint.root(i) for i in range(N)])
 print(len(roots))

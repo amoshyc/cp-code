@@ -6,123 +6,105 @@ fn main() {
     let n = read::<usize>();
     let arr = readv::<i32>();
 
-    let inf = 1_000_000_000;
-    let mut xys = arr
-        .iter()
-        .enumerate()
-        .map(|(i, &x)| (i as i32, x as i32))
-        .collect::<Vec<_>>();
-    let mut dis = vec![vec![inf; 4]; n];
-
-    let op_min = |a: i32, b: i32| std::cmp::min(a, b);
-    let op_max = |a: i32, b: i32| std::cmp::max(a, b);
-
-    // ↗
-    {
-        let mut seg = SegTree::<i32>::new(n + 1, inf, op_min);
-        xys.sort_by_key(|&(x, y)| (Reverse(x), Reverse(y)));
-        for &(x, y) in xys.iter() {
-            let prev = seg.prod(y as usize, n + 1, 0, 0, seg.nn);
-            if prev != inf {
-                dis[x as usize][0] = prev - (x + y);
+    let solve = |xs: &[i32], ys: &[i32]| {
+        let mut seg = SegTree::<Node>::new(n + 1);
+        let mut dis = vec![Node::default(); n];
+        let mut indices = (0..n).collect::<Vec<usize>>();
+        indices.sort_by_key(|&i| (Reverse(xs[i]), Reverse(ys[i])));
+        for i in indices {
+            let prev = seg.get(ys[i] as usize, n + 1, 0, 0, seg.nn);
+            if prev != Node::default() {
+                dis[i] = prev - (xs[i] + ys[i]);
             }
-            seg.apply(y as usize, x + y, 0, 0, seg.nn);
+            seg.set(ys[i] as usize, xs[i] + ys[i], 0, 0, seg.nn);
         }
-    }
+        dis
+    };
 
-    // ↖
-    {
-        let mut seg = SegTree::<i32>::new(n + 1, -inf, op_max);
-        xys.sort_by_key(|&(x, y)| (x, Reverse(y)));
-        for &(x, y) in xys.iter() {
-            let prev = seg.prod(y as usize, n + 1, 0, 0, seg.nn);
-            if prev != -inf {
-                dis[x as usize][1] = (x - y) - prev;
-            }
-            seg.apply(y as usize, x - y, 0, 0, seg.nn);
-        }
-    }
-    
-    // ↙
-    {
-        let mut seg = SegTree::<i32>::new(n + 1, -inf, op_max);
-        xys.sort_by_key(|&(x, y)| (x, y));
-        for &(x, y) in xys.iter() {
-            let prev = seg.prod(0, y as usize, 0, 0, seg.nn);
-            if prev != -inf {
-                dis[x as usize][2] = (x + y) - prev;
-            }
-            seg.apply(y as usize, x + y, 0, 0, seg.nn);
-        }
-    }
-    
-    // ↘
-    {
-        let mut seg = SegTree::<i32>::new(n + 1, inf, op_min);
-        xys.sort_by_key(|&(x, y)| (Reverse(x), y));
-        for &(x, y) in xys.iter() {
-            let prev = seg.prod(0, y as usize, 0, 0, seg.nn);
-            if prev != inf {
-                dis[x as usize][3] = prev - (x - y);
-            }
-            seg.apply(y as usize, x - y, 0, 0, seg.nn);
-        }
-    }
+    let xs: Vec<i32> = (0..n).map(|i| i as i32).collect();
+    let ys: Vec<i32> = arr.clone();
+    let dis1 = solve(&xs, &ys);
 
-    let mut ans = vec![inf; n];
+    let xs: Vec<i32> = (0..n).map(|i| (n - i) as i32).collect();
+    let ys: Vec<i32> = arr.clone();
+    let dis2 = solve(&xs, &ys);
+
+    let xs: Vec<i32> = (0..n).map(|i| (n - i) as i32).collect();
+    let ys: Vec<i32> = arr.iter().map(|&y| n as i32 - y).collect();
+    let dis3 = solve(&xs, &ys);
+
+    let xs: Vec<i32> = (0..n).map(|i| i as i32).collect();
+    let ys: Vec<i32> = arr.iter().map(|&y| n as i32 - y).collect();
+    let dis4 = solve(&xs, &ys);
+
+    let mut ans = vec![Node::default(); n];
     for i in 0..n {
-        ans[i] = *dis[i].iter().min().unwrap();
+        let cands = vec![dis1[i], dis2[i], dis3[i], dis4[i]];
+        ans[i] = *cands.iter().min().unwrap();
     }
 
     println!("{}", join(&ans, " "));
 }
 
-struct SegTree<S> {
-    nn: usize,
-    data: Vec<S>,
-    default_data: S,
-    op: fn(S, S) -> S,
+struct Node;
+impl SegTrait for Node {
+    type S = i32;
+    fn default() -> Self::S {
+        10i32.pow(9)
+    }
+    fn op(a: Self::S, b: Self::S) -> Self::S {
+        a.min(b)
+    }
 }
 
-impl<S: Copy + PartialEq> SegTree<S> {
-    fn new(n: usize, default_data: S, op: fn(S, S) -> S) -> SegTree<S> {
+trait SegTrait {
+    type S: Clone;
+    fn default() -> Self::S;
+    fn op(a: Self::S, b: Self::S) -> Self::S;
+}
+
+struct SegTree<T: SegTrait> {
+    nn: usize,
+    data: Vec<T::S>,
+}
+
+impl<T: SegTrait> SegTree<T> {
+    fn new(n: usize) -> Self {
         let nn = n.next_power_of_two();
-        let data = vec![default_data; 2 * nn];
-        Self {
-            nn,
-            data,
-            default_data,
-            op,
-        }
+        let data = vec![T::default(); 2 * nn];
+        Self { nn, data }
     }
 
-    fn init(&mut self, arr: &[S]) {
-        let s = self.nn - 1;
+    fn from_vec(arr: &Vec<T::S>) -> Self {
+        let nn = arr.len().next_power_of_two();
+        let mut data = vec![T::default(); 2 * nn];
+        let s = nn - 1;
         let t = s + arr.len();
-        self.data[s..t].clone_from_slice(arr);
-        for u in (0..(self.nn - 1)).rev() {
-            self.data[u] = (self.op)(self.data[2 * u + 1], self.data[2 * u + 2]);
+        data[s..t].clone_from_slice(arr);
+        for u in (0..s).rev() {
+            data[u] = T::op(data[2 * u + 1].clone(), data[2 * u + 2].clone());
         }
+        Self { nn, data }
     }
 
-    fn prod(&mut self, a: usize, b: usize, u: usize, l: usize, r: usize) -> S {
+    fn get(&mut self, a: usize, b: usize, u: usize, l: usize, r: usize) -> T::S {
         // l..r has no intersection with a..b
         if l >= b || r <= a {
-            return self.default_data;
+            return T::default();
         }
         // l..r is inside a..b
         if l >= a && r <= b {
-            return self.data[u];
+            return self.data[u].clone();
         }
         // partially intersect
         let m = (l + r) / 2;
-        (self.op)(
-            self.prod(a, b, 2 * u + 1, l, m),
-            self.prod(a, b, 2 * u + 2, m, r),
+        T::op(
+            self.get(a, b, 2 * u + 1, l, m),
+            self.get(a, b, 2 * u + 2, m, r),
         )
     }
 
-    fn apply(&mut self, i: usize, x: S, u: usize, l: usize, r: usize) {
+    fn set(&mut self, i: usize, x: T::S, u: usize, l: usize, r: usize) {
         // l..r has no intersection with i..i+1
         if l >= i + 1 || r <= i {
             return;
@@ -134,9 +116,9 @@ impl<S: Copy + PartialEq> SegTree<S> {
         }
         // partially intersect
         let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
-        self.apply(i, x, lch, l, m);
-        self.apply(i, x, rch, m, r);
-        self.data[u] = (self.op)(self.data[lch], self.data[rch]);
+        self.set(i, x.clone(), lch, l, m);
+        self.set(i, x.clone(), rch, m, r);
+        self.data[u] = T::op(self.data[lch].clone(), self.data[rch].clone());
     }
 }
 

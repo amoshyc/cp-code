@@ -1,9 +1,14 @@
 use std::io;
 
-fn main() {
+fn input() -> String {
     let mut inp = String::new();
     io::stdin().read_line(&mut inp).unwrap();
     inp = inp.trim().to_string();
+    inp
+}
+
+fn main() {
+    let inp = input();
     if inp == "RRR" {
         println!("3");
     }

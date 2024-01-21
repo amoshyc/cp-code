@@ -1,37 +1,38 @@
 #![allow(unused)]
 
 fn main() {
-    let inp = readv::<usize>();
-    let (n, c) = (inp[0], inp[1]);
-    // pref[i, j, 0] = result of 0 after performing 0..=i operations for bit j
-    // pref[i, j, 1] = result of 1 after performing 0..=i operations for bit j
-    // pref[i, j, 0] = apply(op[i], pref[i - 1, j, 0])
-    // pref[i, j, 1] = apply(op[i], pref[i - 1, j, 1])
-    let mut pref = vec![vec![vec![0, 0]; 30]; n];
-    for i in 0..n {
-        let inp = readv::<usize>();
-        let (cmd, a) = (inp[0], inp[1]);        
-        for j in 0..30 {
-            let apply_op = |x| {
-                match cmd {
-                    1 => x & ((a >> j) & 1),
-                    2 => x | ((a >> j) & 1),
-                    3 => x ^ ((a >> j) & 1),
-                    _ => 0
-                }
-            };
-            let prev0 = if i == 0 { 0 } else { pref[i - 1][j][0] };
-            let prev1 = if i == 0 { 1 } else { pref[i - 1][j][1] };
-            pref[i][j][0] = apply_op(prev0);
-            pref[i][j][1] = apply_op(prev1);
-        }
+    let inp = readv::<u32>();
+    let (n, c) = (inp[0] as usize, inp[1]);
+    let mut cmds = vec![];
+    let mut arr = vec![];
+    for _ in 0..n {
+        let inp = readv::<u32>();
+        cmds.push(inp[0]);
+        arr.push(inp[1]);
     }
 
     let mut ans = vec![0; n];
-    for i in 0..n {
-        let prev = if i == 0 { c } else { ans[i - 1] };
-        for j in 0..30 {
-            let bit = pref[i][j][(prev >> j) & 1];
+    for j in 0..30 {
+        let mut pref_0 = 0;
+        let mut pref_1 = 1;
+        for i in 0..n {
+            let a = (arr[i] >> j) & 1;
+            match cmds[i] {
+                1 => {
+                    pref_0 = (pref_0 & a);
+                    pref_1 = (pref_1 & a);
+                }
+                2 => {
+                    pref_0 = (pref_0 | a);
+                    pref_1 = (pref_1 | a);
+                }
+                _ => {
+                    pref_0 = (pref_0 ^ a);
+                    pref_1 = (pref_1 ^ a);
+                }
+            }
+            let prev = if i == 0 { c } else { ans[i - 1] };
+            let bit = if (prev >> j) & 1 == 1 { pref_1 } else { pref_0 };
             ans[i] |= (bit << j);
         }
     }

@@ -1,11 +1,12 @@
-from math import ceil
+def ceil_div(a, b):
+    return (a + b - 1) // b
 
 N, K = map(int, input().split())
 A = list(map(int, input().split()))
 
 
 def check(l):
-    cnt = sum(ceil(a / l) - 1 for a in A)
+    cnt = sum(ceil_div(a, l) - 1 for a in A)
     return cnt <= K
 
 lb, ub = 0, max(A)
@@ -15,4 +16,6 @@ for _ in range(50):
         ub = mid
     else:
         lb = mid
+
+from math import ceil
 print(ceil(ub))

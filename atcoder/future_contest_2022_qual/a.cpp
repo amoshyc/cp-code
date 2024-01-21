@@ -43,11 +43,12 @@ int main() {
     vector<int> start(N, -1);
     vector<int> duration(N, -1);
     vector<string> status(N, "init");
+    vector<vector<int>> prediction(N, vector<int>(M, 1e9));
 
     int n_complete = 0;
     int day = 0;
 
-    const int N_TRAIN = N;
+    const int N_TRAIN = 350;
 
     auto dist = [&](int a, int b) -> int {
         int res = 0;
@@ -98,6 +99,15 @@ int main() {
             for (auto v : G[task_id]) {
                 indeg[v]--;
             }
+
+            for (int tid = 0; tid < N; tid++) {
+                if (status[tid] == "init") {
+                    int dist2train = dist(tid, task_id) + duration[task_id];
+                    if (dist2train < prediction[tid][user_id]) {
+                        prediction[tid][user_id] = dist2train;
+                    }
+                }
+            }
         }
     };
 
@@ -132,26 +142,6 @@ int main() {
         update(day);
         if (n_complete >= N_TRAIN) {
             break;
-        }
-    }
-
-    vector<vector<int>> prediction(N, vector<int>(M, 1e9));
-    vector<int> train_task_ids;
-    for (int task_id = 0; task_id < N; task_id++) {
-        if (status[task_id] == "done") {
-            train_task_ids.push_back(task_id);
-        }
-    }
-
-    for (int task_id = 0; task_id < N; task_id++) {
-        if (status[task_id] == "done")
-            continue;
-        for (auto train_id : train_task_ids) {
-            int user_id = assign[train_id];
-            int dist2train = dist(task_id, train_id) + duration[train_id];
-            if (dist2train < prediction[task_id][user_id]) {
-                prediction[task_id][user_id] = dist2train;
-            }
         }
     }
 

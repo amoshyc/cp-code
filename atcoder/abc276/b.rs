@@ -9,11 +9,13 @@ fn main() {
         adj[v].push(u);
     }
 
+    let mut ans = vec![];
     for u in 0..n {
         adj[u].sort();
         let vs = adj[u].iter().map(|x| x + 1).collect::<Vec<usize>>();
-        println!("{} {}", vs.len(), join(&vs, " "));
+        ans.push(format!("{} {}", vs.len(), join(&vs, " ")))
     }
+    println!("{}", join(&ans, "\n"));
 }
 
 fn read<T: std::str::FromStr>() -> T {

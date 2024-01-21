@@ -11,6 +11,6 @@ N, K = map(int, input().split())
 ans = 0
 for beta in range(2, 2 * N + 1):
     alpha = beta + K
-    if 1 <= alpha <= 2 * N:
+    if 2 <= alpha <= 2 * N:
         ans += f(alpha, 1, N, 1, N) * f(beta, 1, N, 1, N)
 print(ans)

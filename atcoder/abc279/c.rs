@@ -1,9 +1,6 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-
 fn main() {
     let inp = readv::<usize>();
-    let (h, w) = (inp[0], inp[1]);
+    let (h, _) = (inp[0], inp[1]);
 
     let mut a = vec![];
     let mut b = vec![];
@@ -14,27 +11,15 @@ fn main() {
         b.push(reads());
     }
 
-    let mut ha = vec![];
-    let mut hb = vec![];
-    for c in 0..w {
-        let col_a = a.iter().map(|row| row[c]).collect::<Vec<char>>();
-        let col_b = b.iter().map(|row| row[c]).collect::<Vec<char>>();
-
-        let mut h = DefaultHasher::new();
-        col_a.hash(&mut h);
-        ha.push(h.finish());
-
-        let mut h = DefaultHasher::new();
-        col_b.hash(&mut h);
-        hb.push(h.finish());
-    }
-    ha.sort();
-    hb.sort();
+    let mut ta = transpose(&a);
+    let mut tb = transpose(&b);
+    ta.sort();
+    tb.sort();
 
     // println!("{:?}", ha);
     // println!("{:?}", hb);
 
-    println!("{}", if ha == hb { "Yes" } else { "No" });
+    println!("{}", if ta == tb { "Yes" } else { "No" });
 }
 
 fn read<T: std::str::FromStr>() -> T {
@@ -52,4 +37,13 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
 
 fn reads() -> Vec<char> {
     read::<String>().chars().collect::<Vec<char>>()
+}
+
+fn transpose<T: Copy>(arr: &Vec<Vec<T>>) -> Vec<Vec<T>> {
+    assert!(arr.len() >= 1);
+    let mut res = vec![];
+    for c in 0..arr[0].len() {
+        res.push(arr.iter().map(|row| row[c]).collect::<Vec<T>>());
+    }
+    res
 }

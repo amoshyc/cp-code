@@ -230,6 +230,9 @@ S apply_lazy(F lazy, S data) { return min(lazy, data); }
 F push_lazy(F root_lazy, F child_lazy) { return min(root_lazy, child_lazy); }
 F default_lazy() { return F(1e10); }
 
+using SegTree =
+    lazy_segtree<S, op, default_data, F, apply_lazy, push_lazy, default_lazy>;
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -237,8 +240,8 @@ int main() {
     ll N, Q;
     cin >> N >> Q;
 
-    lazy_segtree<S, op, default_data, F, apply_lazy, push_lazy, default_lazy>
-        min_col_of_row(N), min_row_of_col(N);
+    auto min_col_of_row = SegTree(N);
+    auto min_row_of_col = SegTree(N);
 
     min_col_of_row.apply(1, N, N - 1);
     min_row_of_col.apply(1, N, N - 1);

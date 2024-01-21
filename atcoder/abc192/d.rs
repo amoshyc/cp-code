@@ -1,11 +1,11 @@
-fn solve() -> u64 {
+fn solve() -> i64 {
     let inp = reads();
     let digits = inp
         .iter()
-        .map(|&c| c.to_digit(10).unwrap() as u64)
-        .collect::<Vec<u64>>();
+        .map(|&c| c.to_digit(10).unwrap() as i64)
+        .collect::<Vec<i64>>();
 
-    let m = read::<u64>();
+    let m = read::<i64>();
 
     if digits.len() == 1 {
         if digits[0] <= m {
@@ -15,10 +15,14 @@ fn solve() -> u64 {
         }
     }
 
-    let check = |base: u64| -> bool {
-        let val = digits.iter().fold(0 as u64, |acc, &d| {
-            acc.saturating_mul(base).saturating_add(d)
-        });
+    let check = |base: i64| -> bool {
+        let mut val = 0 as i64;
+        for &d in digits.iter() {
+            if val > (m - d) / base {
+                return false;
+            }
+            val = val * base + d;
+        }
         val <= m
     };
 
@@ -29,11 +33,11 @@ fn solve() -> u64 {
         return 0;
     }
     while ub - lb > 1 {
-        let m = (lb + ub) / 2;
-        if check(m) {
-            lb = m;
+        let mid = (lb + ub) / 2;
+        if check(mid) {
+            lb = mid;
         } else {
-            ub = m;
+            ub = mid;
         }
     }
 

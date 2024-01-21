@@ -1,6 +1,6 @@
 fn main() {
-    let n: usize = read();
-    let inp: Vec<i32> = readv();
+    let n = read::<usize>();
+    let inp = readv::<i32>();
     let mut dep = vec![0; 2 * n + 2];
     for (i, &a) in inp.iter().enumerate() {
         let a = a as usize;

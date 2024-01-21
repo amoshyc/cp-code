@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <queue>
@@ -10,26 +9,19 @@ using namespace std;
 int dr[] = {-1, +1, 0, 0};
 int dc[] = {0, 0, -1, +1};
 
-char A[2222][2222];
-int dis[2222][2222];
-bool vis[2222][2222];
-
 int main() {
-    int H, W;
-    scanf("%d %d", &H, &W);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    for (int r = 0; r < H; r++) {
-        for (int c = 0; c < W; c++) {
-            dis[r][c] = -1;
-            vis[r][c] = false;
-        }
-    }
+    int H, W;
+    cin >> H >> W;
 
     int sr, sc;
     int gr, gc;
     vector<tuple<int, int>> jumps[26];
+    vector<string> A(H);
     for (int r = 0; r < H; r++) {
-        scanf("%s", A[r]);
+        cin >> A[r];
         for (int c = 0; c < W; c++) {
             if (A[r][c] == 'S') {
                 sr = r;
@@ -44,17 +36,14 @@ int main() {
     }
 
     queue<tuple<int, int, int>> que;
+    vector<vector<int>> dis(H, vector<int>(W, -1));
 
     dis[sr][sc] = 0;
-    vis[sr][sc] = true;
     que.push({sr, sc, 0});
 
     while (!que.empty()) {
         auto [r, c, d] = que.front();
         que.pop();
-
-        if (r == gr and c == gc)
-            break;
 
         for (int i = 0; i < 4; i++) {
             int nr = r + dr[i];
@@ -65,26 +54,24 @@ int main() {
                 continue;
             if (A[nr][nc] == '#')
                 continue;
-            if (vis[nr][nc])
+            if (dis[nr][nc] != -1)
                 continue;
             dis[nr][nc] = d + 1;
-            vis[nr][nc] = true;
             que.push({nr, nc, d + 1});
         }
 
         if ('a' <= A[r][c] and A[r][c] <= 'z') {
             for (auto [nr, nc] : jumps[A[r][c] - 'a']) {
-                if (!vis[nr][nc]) {
+                if (dis[nr][nc] == -1) {
                     dis[nr][nc] = d + 1;
-                    vis[nr][nc] = true;
                     que.push({nr, nc, d + 1});
                 }
             }
+            jumps[A[r][c] - 'a'].clear();
         }
     }
 
-    // cout << dis[gr][gc] << endl;
-    printf("%d\n", dis[gr][gc]);
+    cout << dis[gr][gc] << endl;
 
     return 0;
 }

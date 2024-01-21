@@ -8,6 +8,7 @@ fn main() {
     let mut s = 0;
     let mut val = 1 as u64;
 
+    let mut ans = vec![];
     for _ in 0..q {
         let inp = readv::<u64>();
 
@@ -19,9 +20,11 @@ fn main() {
             val = (val + m - arr[s] * powmod(10, e as u64, m) % m) % m;
             s += 1;
         } else {
-            println!("{}", val);
+            ans.push(val);
         }
     }
+
+    println!("{}", join(&ans, "\n"));
 }
 
 fn powmod(a: u64, mut b: u64, m: u64) -> u64 {

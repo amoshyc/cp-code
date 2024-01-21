@@ -4,7 +4,7 @@
 # 2 3
 # 3 4
 # 4 5
-# expects 2 ** 4 = 16
+# expects 16
 
 N, M, K = map(int, input().split())
 A = [int(x) - 1 for x in input().split()]

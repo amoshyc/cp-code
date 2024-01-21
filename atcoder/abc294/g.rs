@@ -48,17 +48,16 @@ fn main() {
     println!("{}", join(&ans, "\n"));
 }
 
-#[derive(Debug)]
+#[derive(Debug)] // To allow println!("{:#?}", hld);
 struct HLD {
-    size: Vec<usize>,
-    depth: Vec<usize>,
-    heavy: Vec<usize>,
-    parent: Vec<usize>,
-
-    top: Vec<usize>,
-    tour: Vec<usize>,
-    t_enter: Vec<usize>,
-    t_leave: Vec<usize>,
+    size: Vec<usize>,    // size[u] = size of subtree of u
+    depth: Vec<usize>,   // depth[u] = depth of node u
+    heavy: Vec<usize>,   // heavy[u] = child of u that has heavy edge
+    parent: Vec<usize>,  // parent[u] = parent of node u
+    top: Vec<usize>,     // top[u] = the top node of the path u belongs to
+    tour: Vec<usize>,    // tour = euler tour
+    t_enter: Vec<usize>, // t_enter[u] = enter time of u
+    t_leave: Vec<usize>, // t_leave[u] = leave time of u
 }
 
 impl HLD {
@@ -97,7 +96,7 @@ impl HLD {
             }
         }
 
-        // DFS to decompose tree
+        // DFS to decompose tree, finding top, tour, t_enter, t_leave
         let mut time = 0;
         let mut top = vec![std::usize::MAX; n];
         let mut tour = vec![std::usize::MAX; n];
@@ -114,6 +113,7 @@ impl HLD {
                 time += 1;
                 for &v in adj[u].iter().rev() {
                     if v != parent[u] {
+                        // heavy edge / light edge
                         top[v] = if v == heavy[u] { top[u] } else { v };
                         stack.push(('l', v));
                         stack.push(('e', v));

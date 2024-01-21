@@ -17,6 +17,8 @@ else:
     ans = ((sat[vals] == 1) & (cnts == 1)).sum().item()
     print(ans)
 
+# 1
+# 1
 # 5
 # 2 2 2 3 3
 # 5

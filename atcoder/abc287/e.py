@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 
-class PolyHash:
+class PolyHasher:
     def __init__(self, N, base=31, mod=10**9 + 7):
         self.base = base
         self.mod = mod  # should be prime
@@ -23,7 +23,7 @@ class PolyHash:
         return h
 
     def range(self, h, l, r):  # [l, r)
-        if r == 0:
+        if l == r:
             return 0
         elif l == 0:
             return h[r - 1]
@@ -31,8 +31,8 @@ class PolyHash:
             return (h[r - 1] - h[l - 1]) % self.mod * self.pinv[l] % self.mod
 
 
-HR1 = PolyHash(500_000, base=31, mod=1_000_000_007)
-HR2 = PolyHash(500_000, base=29, mod=1_000_000_009)
+HR1 = PolyHasher(500_000, base=31, mod=1_000_000_007)
+HR2 = PolyHasher(500_000, base=29, mod=1_000_000_009)
 
 N = int(input())
 S = [input() for _ in range(N)]
@@ -44,6 +44,7 @@ for s, h1, h2 in zip(S, H1, H2):
     for i in range(len(s) + 1):
         C[(HR1.range(h1, 0, i), HR2.range(h2, 0, i))] += 1
 
+ans = []
 for s, h1, h2 in zip(S, H1, H2):
     lb, ub = 0, len(s) + 1
     while ub - lb > 1:
@@ -52,4 +53,6 @@ for s, h1, h2 in zip(S, H1, H2):
             lb = m
         else:
             ub = m
-    print(lb)
+    ans.append(lb)
+
+print('\n'.join(map(str, ans)))

@@ -25,11 +25,7 @@ for i in range(N - 2, -1, -1):
 ans = 10**9
 for w in W:
     idx = bisect_left(H, w)
-    if idx == N:
-        val = pref[N - 2] + w - H[-1]
-    elif idx == 0:
-        val = suff[1] + H[0] - w
-    elif idx % 2 == 1:
+    if idx % 2 == 1:
         val = pref[idx - 2] + suff[idx] + w - H[idx - 1]
     else:
         val = pref[idx - 1] + suff[idx + 1] + H[idx] - w

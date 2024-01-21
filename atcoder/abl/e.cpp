@@ -12,18 +12,13 @@ struct S {
 };
 using F = int;
 
-ostream& operator << (ostream& out, const S& data) {
-    out << "[" << data.value.val() << " , " << data.base.val() << "]";
-    return out;
-}
-
 S op(S a, S b) { return {a.value + b.value, a.base + b.base}; }
 S default_data() { return {0, 0}; }
 S apply_lazy(F lazy, S data) {
     if (lazy == 0) {
         return data;
     }
-    return {lazy * data.base, data.base}; 
+    return {lazy * data.base, data.base};
 }
 F push_lazy(F root, F child) {
     if (root == 0) {
@@ -35,7 +30,6 @@ F default_lazy() { return 0; }
 
 using SegTree = atcoder::lazy_segtree<S, op, default_data, F, apply_lazy,
                                       push_lazy, default_lazy>;
-
 
 int main() {
     ios::sync_with_stdio(false);
@@ -55,10 +49,10 @@ int main() {
     while (Q--) {
         int l, r, d;
         cin >> l >> r >> d;
-        l--; 
+        l--;
         r--;
         tree.apply(N - 1 - r, N - l, d);
-        cout << tree.all_prod().value.val() << endl;
+        cout << tree.all_prod().value.val() << "\n";
     }
 
     return 0;

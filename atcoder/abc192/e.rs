@@ -16,10 +16,9 @@ fn main() {
     let mut que = BinaryHeap::new();
     let mut dis = vec![std::i64::MAX; n];
     dis[x] = 0;
-    que.push(Reverse((dis[x], x)));
+    que.push((Reverse(dis[x]), x));
 
-    while !que.is_empty() {
-        let Reverse((d, u)) = que.pop().unwrap();
+    while let Some((Reverse(d), u)) = que.pop() {
         if d > dis[u] {
             continue;
         }
@@ -27,7 +26,7 @@ fn main() {
             let new_d = (d + (k - 1)) / k * k + t;
             if new_d < dis[v] {
                 dis[v] = new_d;
-                que.push(Reverse((dis[v], v)));
+                que.push((Reverse(dis[v]), v));
             }
         }
     }

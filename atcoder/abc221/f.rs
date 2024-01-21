@@ -17,9 +17,8 @@ fn main() {
     let mut path = vec![t];
     loop {
         let last = path[path.len() - 1];
-        let &p = parent.get(&last).unwrap();
-        if p != std::usize::MAX {
-           path.push(p);
+        if parent[&last] != std::usize::MAX {
+           path.push(parent[&last]);
         } else {
             break;
         }
@@ -34,7 +33,7 @@ fn main() {
             cnts.push(
                 nodes
                     .iter()
-                    .filter(|&&u| *depth.get(&u).unwrap() == diameter / 2 - 1)
+                    .filter(|&&u| depth[&u] == diameter / 2 - 1)
                     .count() as u64,
             );
         }
@@ -51,12 +50,12 @@ fn main() {
         let (nodes, _, depth) = bfs(&adj, root1, root2);
         let cnt1 = nodes
             .iter()
-            .filter(|&&u| *depth.get(&u).unwrap() == (diameter - 1) / 2)
+            .filter(|&&u| depth[&u] == (diameter - 1) / 2)
             .count() as u64;
         let (nodes, _, depth) = bfs(&adj, root2, root1);
         let cnt2 = nodes
             .iter()
-            .filter(|&&u| *depth.get(&u).unwrap() == (diameter - 1) / 2)
+            .filter(|&&u| depth[&u] == (diameter - 1) / 2)
             .count() as u64;
         let ans = (cnt1 % mdl) * (cnt2 % mdl) % mdl;
         println!("{}", ans);
@@ -86,7 +85,7 @@ fn bfs(
         for &v in adj[u].iter() {
             if v != p {
                 parent.insert(v, u);
-                depth.insert(v, *depth.get(&u).unwrap() + 1);
+                depth.insert(v, depth[&u] + 1);
                 queue.push_back((v, u));
             }
         }

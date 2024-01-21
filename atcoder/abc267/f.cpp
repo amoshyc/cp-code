@@ -43,7 +43,7 @@ tuple<vector<int>, vector<int>, vector<int>> bfs(const vector<vector<int>> &G,
     return {vis, par, dep};
 }
 
-vector<vector<int>> build_dp(int N, vector<int> par) {
+vector<vector<int>> build_dp(int N, const vector<int>& par) {
     const int L = floor(log2(N)) + 1;
     auto dp = vector(L, vector(N, -1));
     for (int u = 0; u < N; u++) {

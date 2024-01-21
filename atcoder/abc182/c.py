@@ -1,27 +1,13 @@
-from collections import defaultdict
+from itertools import combinations
 
 N = input()
 r = int(N) % 3
-
+A = [int(c) % 3 for c in N]
 if r == 0:
     print(0)
-    exit()
-
-cnt = defaultdict(int)
-for c in N:
-    cnt[int(c) % 3] += 1
-
-if cnt[r] > 0 and len(N) > 1:
+elif len(A) >= 2 and any(a == r for a in A):
     print(1)
-    exit()
-
-if r == 2 and cnt[1] >= 2 and len(N) > 2:
+elif len(A) >= 3 and any((a + b) % 3 == r for a, b in combinations(A, 2)):
     print(2)
-    exit()
-
-if r == 1 and cnt[2] >= 2 and len(N) > 2:
-    print(2)
-    exit()
-
-print(-1)
-
+else:
+    print(-1)

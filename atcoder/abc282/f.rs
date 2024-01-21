@@ -1,11 +1,11 @@
 #![allow(unused)]
 
-use std::io::Write;
 use std::collections::HashMap;
 
 fn main() {
     let n = read::<usize>();
 
+    // Like sparse table
     let mut pairs = vec![];
     let mut w = 1;
     while w <= n {
@@ -27,7 +27,7 @@ fn main() {
         .join("\n");
     println!("{}", pairs.len());
     println!("{}", s);
-    std::io::stdout().flush();
+    flush();
 
     let q = read::<usize>();
     for _ in 0..q {
@@ -37,8 +37,13 @@ fn main() {
         let x = inv[&(l, l + w)];
         let y = inv[&(r - w, r)];
         println!("{} {}", x, y);
-        std::io::stdout().flush();
+        flush();
     }
+}
+
+use std::io::Write;
+fn flush() {
+    std::io::stdout().flush();
 }
 
 fn read<T: std::str::FromStr>() -> T {

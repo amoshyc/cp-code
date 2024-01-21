@@ -1,16 +1,28 @@
+#![allow(unused)]
+
 fn main() {
     let _ = read::<usize>();
     let mut arr = readv::<usize>();
-    prev_permutation(&mut arr);
-    println!("{}", join(&arr, " "));
+    let res = prev_permutation(&arr).unwrap();
+    println!("{}", join(&res, " "));
 }
 
-fn prev_permutation<T: Ord>(array: &mut [T]) -> Option<()> {
-    let k = array.windows(2).rposition(|w| w[0] > w[1])?;
-    let j = array.iter().rposition(|a| a < &array[k]).unwrap();
-    array.swap(k, j);
-    array[(k + 1)..].reverse();
-    Some(())
+fn next_permutation<T: Ord + Clone>(arr: &Vec<T>) -> Option<Vec<T>> {
+    let mut res = (*arr).clone();
+    let k = res.windows(2).rposition(|w| w[0] < w[1])?;
+    let j = res.iter().rposition(|a| *a > arr[k]).unwrap();
+    res.swap(k, j);
+    res[(k + 1)..].reverse();
+    Some(res)
+}
+
+fn prev_permutation<T: Ord + Clone>(arr: &Vec<T>) -> Option<Vec<T>> {
+    let mut res = (*arr).clone();
+    let k = res.windows(2).rposition(|w| w[0] > w[1])?;
+    let j = res.iter().rposition(|a| *a < arr[k]).unwrap();
+    res.swap(k, j);
+    res[(k + 1)..].reverse();
+    Some(res)
 }
 
 fn read<T: std::str::FromStr>() -> T {
@@ -26,8 +38,16 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
         .collect()
 }
 
-fn join<T: ToString>(v: &[T], sep: &str) -> String {
-    v.iter()
+fn reads() -> Vec<char> {
+    read::<String>().chars().collect::<Vec<char>>()
+}
+
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
+}
+
+fn join<T: ToString>(arr: &[T], sep: &str) -> String {
+    arr.iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
         .join(sep)

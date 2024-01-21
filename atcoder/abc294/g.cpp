@@ -118,7 +118,7 @@ template <typename T> struct BIT {
 
     T sum(int l, int r) { // l..r
         T val = prefix(r - 1);
-        if (l == 0) {
+        if (l != 0) {
             val -= prefix(l - 1);
         }
         return val;

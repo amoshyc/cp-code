@@ -1,12 +1,12 @@
-from math import sqrt
+from math import hypot
 
 class DisjoinSet:
     def __init__(self, N):
-        self.par = [-1] * N
+        self.par = list(range(N))
         self.sz = [1] * N
 
     def root(self, x):
-        if self.par[x] < 0:
+        if self.par[x] == x:
             return x
         else:
             self.par[x] = self.root(self.par[x])
@@ -48,7 +48,7 @@ def check(r):
     dsu = DisjoinSet(N + 2)
     for i in range(N):
         for j in range(i + 1, N):
-            if sqrt((xs[i] - xs[j]) ** 2 + (ys[i] - ys[j]) ** 2) < 2 * r:
+            if hypot(xs[i] - xs[j], ys[i] - ys[j]) < 2 * r:
                 dsu.unite(i, j)
     for i in range(N):
         if abs(ys[i] - 100) < 2 * r:

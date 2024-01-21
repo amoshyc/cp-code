@@ -22,7 +22,7 @@ int main() {
     int N1 = N / 2;
     int N2 = N - N1;
 
-    set<ll> s1;
+    vector<ll> s1;
     for (int mask = 0; mask < (1 << N1); mask++) {
         ll sum = 0;
         for (int i = 0; i < N1; i++) {
@@ -30,10 +30,10 @@ int main() {
                 sum += A[i];
             }
         }
-        s1.emplace(sum);
+        s1.push_back(sum);
     }
 
-    set<ll> s2;
+    vector<ll> s2;
     for (int mask = 0; mask < (1 << N2); mask++) {
         ll sum = 0;
         for (int i = 0; i < N2; i++) {
@@ -41,12 +41,14 @@ int main() {
                 sum += A[N1 + i];
             }
         }
-        s2.emplace(sum);
+        s2.push_back(sum);
     }
+
+    sort(s2.begin(), s2.end());
 
     ll ans = -1;
     for (auto sum1 : s1) {
-        auto ub = s2.upper_bound(T - sum1);
+        auto ub = upper_bound(s2.begin(), s2.end(), T - sum1);
         if (ub != s2.begin()) {
             ll sum2 = *(--ub);
             ans = max(ans, sum1 + sum2);

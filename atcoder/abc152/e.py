@@ -3,19 +3,19 @@ import numpy as np
 class SieveOfEratosthenes:
     def __init__(self, V):
         self.is_prime = np.ones(V + 1, dtype=bool)
-        self.is_prime[2::2] = False
-        self.is_prime[3::3] = False
-        self.is_prime[5::5] = False
+        self.is_prime[4::2] = False
+        self.is_prime[9::3] = False
+        self.is_prime[25::5] = False
         self.primes = [2, 3, 5]
         for i in range(7, V + 1, 2):
             if self.is_prime[i]:
                 self.primes.append(i)
-                if i * i < V + 1:
-                    self.is_prime[i * i::i] = False
+                self.is_prime[i * i::i] = False
     
-    def factorize(self, x, return_dict=False):
+    def factorize(self, x):
+        assert x >= 1
         if x == 1:
-            return {1:1} if return_dict else [(1, 1)]
+            return [(1, 1)]
         result = []
         for p in self.primes:
             exp = 0
@@ -28,8 +28,6 @@ class SieveOfEratosthenes:
                 break
         if x > 1:
             result.append((x, 1))
-        if return_dict:
-            result = {p: e for p, e in result}
         return result
 
 
@@ -38,7 +36,7 @@ M = 10**9 + 7
 A = list(map(int, input().split()))
 
 sieve = SieveOfEratosthenes(10**3)
-F = [sieve.factorize(a, return_dict=True) for a in A]
+F = [dict(sieve.factorize(a)) for a in A]
 
 lcm = F[0]
 for i in range(1, len(F)):
@@ -51,6 +49,7 @@ for i in range(1, len(F)):
 val = 1
 for p, e in lcm.items():
     val = val * pow(p, e, M) % M
+# print(val)
 
 B = [val * pow(a, M - 2, M) % M for a in A]
 print(sum(B) % M)

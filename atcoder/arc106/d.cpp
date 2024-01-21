@@ -44,8 +44,8 @@ int main() {
     sum_of_pow[0] = N;
     for (int i = 0; i < N; i++) {
         mint a = A[i];
-        for (int k = 1; k <= K; k++) {
-            sum_of_pow[k] += a;
+        for (int c = 1; c <= K; c++) {
+            sum_of_pow[c] += a;
             a = a * A[i];
         }
     }

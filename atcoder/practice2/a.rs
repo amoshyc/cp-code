@@ -1,7 +1,9 @@
+#![allow(unused)]
+
 fn main() {
     let inp = readv::<usize>();
     let (n, q) = (inp[0], inp[1]);
-    let mut tree = UnionFind::new(n);
+    let mut tree = DSU::new(n);
     let mut ans = vec![];
     for _ in 0..q {
         let cmd = readv::<usize>();
@@ -15,51 +17,45 @@ fn main() {
     println!("{}", join(&ans, "\n"));
 }
 
-struct UnionFind {
-    parent: Vec<usize>,
-    size: Vec<usize>,
+struct DSU {
+    par: Vec<usize>,
+    siz: Vec<usize>,
 }
 
-impl UnionFind {
-    fn new(n: usize) -> UnionFind {
-        UnionFind {
-            parent: vec![n; n],
-            size: vec![1; n],
+impl DSU {
+    fn new(n: usize) -> Self {
+        Self {
+            par: (0..n).collect(),
+            siz: vec![1; n],
         }
     }
 
-    fn root(&mut self, x: usize) -> usize {
-        if self.parent[x] == self.parent.len() {
-            x
+    fn root(&mut self, u: usize) -> usize {
+        if self.par[u] == u {
+            u
         } else {
-            self.parent[x] = self.root(self.parent[x]);
-            self.parent[x]
+            self.par[u] = self.root(self.par[u]);
+            self.par[u]
         }
     }
 
-    fn size(&mut self, x: usize) -> usize {
-        let x = self.root(x);
-        self.size[x]
+    fn unite(&mut self, mut u: usize, mut v: usize) {
+        u = self.root(u);
+        v = self.root(v);
+        if u == v {
+            return;
+        }
+        if self.siz[u] > self.siz[v] {
+            self.par[v] = u;
+            self.siz[u] += self.siz[v];
+        } else {
+            self.par[u] = v;
+            self.siz[v] += self.siz[u];
+        }
     }
 
-    fn same(&mut self, a: usize, b: usize) -> bool {
-        self.root(a) == self.root(b)
-    }
-
-    fn unite(&mut self, a: usize, b: usize) {
-        let mut ra = self.root(a);
-        let mut rb = self.root(b);
-        if ra == rb {
-            return ()
-        }
-        if self.size(ra) > self.size(rb) {
-            // (a, b) = (b, a);
-            let r = ra;
-            ra = rb;
-            rb = r;
-        }
-        self.parent[ra] = rb;
-        self.size[rb] += self.size[ra];
+    fn same(&mut self, u: usize, v: usize) -> bool {
+        self.root(u) == self.root(v)
     }
 }
 
@@ -76,8 +72,16 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
         .collect()
 }
 
-fn join<T: ToString>(v: &[T], sep: &str) -> String {
-    v.iter()
+fn reads() -> Vec<char> {
+    read::<String>().chars().collect::<Vec<char>>()
+}
+
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
+}
+
+fn join<T: ToString>(arr: &[T], sep: &str) -> String {
+    arr.iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
         .join(sep)

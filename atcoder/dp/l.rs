@@ -13,7 +13,8 @@ fn main() {
     // f(i, j, 0) = max(f(i + 1, j, 1) + arr[i], f(i, j - 1, 1) + arr[j])
     // f(i, j, 1) = min(f(i + 1, j, 0) - arr[i], f(i, j - 1, 1) - arr[j])
 
-    let mut dp = vec![vec![vec![0, 0]; n]; n];
+    // let mut dp = vec![vec![vec![0, 0]; n]; n];
+    let mut dp = [[[0; 2]; 3001]; 3001];
     for i in 0..n {
         dp[i][i][0] = arr[i];
         dp[i][i][1] = -arr[i];
@@ -22,8 +23,8 @@ fn main() {
     for l in 2..=n {
         for i in (0..).take_while(|&i| i + l <= n) {
             let j = i + l - 1;
-            dp[i][j][0] = std::cmp::max(dp[i + 1][j][1] + arr[i], dp[i][j - 1][1] + arr[j]);
-            dp[i][j][1] = std::cmp::min(dp[i + 1][j][0] - arr[i], dp[i][j - 1][0] - arr[j]);
+            dp[i][j][0] = (dp[i + 1][j][1] + arr[i]).max(dp[i][j - 1][1] + arr[j]);
+            dp[i][j][1] = (dp[i + 1][j][0] - arr[i]).min(dp[i][j - 1][0] - arr[j]);
         }
     }
 

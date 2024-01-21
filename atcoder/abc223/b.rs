@@ -9,9 +9,10 @@ fn main() {
         ans.push(s.clone());
         ans.push(t.clone());
     }
-    ans.sort();
-    println!("{}", join(&ans[0], ""));
-    println!("{}", join(&ans[ans.len() - 1], ""));
+    let min = ans.iter().min().unwrap();
+    let max = ans.iter().max().unwrap();
+    println!("{}", join(&min, ""));
+    println!("{}", join(&max, ""));
 }
 
 fn read<T: std::str::FromStr>() -> T {

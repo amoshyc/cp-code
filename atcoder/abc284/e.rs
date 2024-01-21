@@ -11,27 +11,36 @@ fn main() {
         adj[v].push(u);
     }
 
+    let (enter, leave) = (0, 1);
     let mut ans = 0;
     let mut vis = vec![false; n];
-    vis[0] = true;
-    dfs(0, &adj, &mut vis, &mut ans);
-    println!("{}", ans);
-}
+    let mut stack = vec![(leave, 0), (enter, 0)];
 
-fn dfs(u: usize, adj: &[Vec<usize>], vis: &mut [bool], ans: &mut usize) {
-    if *ans >= 1_000_000 {
-        return;
-    } else {
-        *ans += 1;
-    }
+    while let Some((act, u)) = stack.pop() {
+        // leave u
+        if act == leave {
+            vis[u] = false;
+            continue;
+        }
 
-    for &v in adj[u].iter() {
-        if !vis[v] {
-            vis[v] = true;
-            dfs(v, adj, vis, ans);
-            vis[v] = false;
+        // enter u
+        vis[u] = true;
+
+        if ans >= 1_000_000 {
+            break;
+        } else {
+            ans += 1;
+        }
+        
+        for &v in adj[u].iter() {
+            if !vis[v] {
+                stack.push((leave, v));
+                stack.push((enter, v));
+            }
         }
     }
+
+    println!("{}", ans);
 }
 
 fn read<T: std::str::FromStr>() -> T {

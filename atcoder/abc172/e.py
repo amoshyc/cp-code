@@ -4,14 +4,13 @@ Let f(x) = 序列內數字唯一，且給定 x 個位置時，使這些位置不
 
 題目所求是 C(N, N) f(N)。
 
-其中 g(x) 代表有至少 N - x 個位置是相同。可以分三個部份填數字，注意順序會影響，所以要乘上全排序：
+其中 g(x) 代表有至少 N - x 個位置是相同。可以分三個部份填數字，注意順序會影響，所以要乘上全排列：
 (1) N - x 個位置（數字必需相同）：C(M, N - x) * (N - x)! = P(M, N - x)
 (2) 序列 A 其餘位置（可以隨便填，但不能用到 (1) 的數字）：C(M - (N - x), x) * x! = P(M - (N - x), x)
 (3) 序列 B 其餘位置（可以隨便填，但不能用到 (1) 的數字）：C(M - (N - x), x) * x! = P(M - (N - x), x)
 g(x) = (1) * (2) * (3)
 
-g(x) 是「選定 0 個位置，使這些位置不同的方法數」、「選定 1 個位置，使這些位置不同的方法數」、…、「選定 N 個位置，使這些位置不同的方法數」，即
-
+g(x) 是「選定 0 個位置，使這些位置不同的方法數」、「選定 1 個位置，使這些位置不同的方法數」、…、「選定 x 個位置，使這些位置不同的方法數」，即
 g(x) = C(x, 0) f(0) + C(x, 1) f(1) + ... + C(x, x) f(x)
      = sum( C(x, i) * f(i) for i in [0, x] )
 根據二項式反演，得到
@@ -49,11 +48,12 @@ N, M = map(int, input().split())
 mod = 10**9 + 7
 tool = CombMod(max(N, M) + 10, mod)
 
-ans = 0
+f_N = 0
 for i in range(0, N + 1):
     p1 = tool.perm(M, N - i)
     p2 = tool.perm(M - (N - i), i)
     g_i = p1 * p2 % mod * p2 % mod
-    val = pow(-1, N - i, mod) * tool.comb(N, i) % mod * g_i % mod
-    ans = (ans + val) % mod
+    val = (-1)**((N - i) % 2) * tool.comb(N, i) % mod * g_i % mod
+    f_N = (f_N + val) % mod
+ans = tool.comb(N, N) * f_N % mod
 print(ans)

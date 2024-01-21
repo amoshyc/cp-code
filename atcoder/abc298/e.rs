@@ -3,56 +3,45 @@
 use std::collections::HashMap;
 
 // f(i, j, 0) = Pr(Takahashi wins if Takahashi is at i and Aoki is at j and it's Takahashi turn)
-// f(i, j, 1) = Pr(Takahashi wins if Takahashi is at i and Aoki is at j and it's Takahashi turn)
+// f(i, j, 1) = Pr(Takahashi wins if Takahashi is at i and Aoki is at j and it's Aoki turn)
 
 // f(n, _, 0) = 1
 // f(_, n, 1) = 0
 // f(i, j, 0) = 1 / P * sum( f(min(i + x, n), j, 1) for x in 1..=P )
 // f(i, j, 1) = 1 / Q * sum( f(i, min(j + x, n), 0) for x in 1..=Q )
-fn f(
-    i: u64,
-    j: u64,
-    t: u64,
-    n: u64,
-    p: u64,
-    q: u64,
-    dp: &mut HashMap<(u64, u64, u64), Mint>,
-) -> Mint {
-    if dp.contains_key(&(i, j, t)) {
-        return dp[&(i, j, t)];
-    }
-
-    if i == n {
-        return Mint(1);
-    }
-    if j == n {
-        return Mint(0);
-    }
-
-    let mut val = Mint(0);
-    if t == 0 {
-        let mut sum = Mint(0);
-        for x in 1..=p {
-            sum = sum + f(n.min(i + x), j, 1, n, p, q, dp);
-        }
-        val = sum / Mint(p);
-    } else {
-        let mut sum = Mint(0);
-        for x in 1..=q {
-            sum = sum + f(i, n.min(j + x), 0, n, p, q, dp);
-        }
-        val = sum / Mint(q);
-    }
-
-    dp.insert((i, j, t), val);
-    val
-}
 
 fn main() {
-    let inp = readv::<u64>();
+    let inp = readv::<usize>();
     let (n, a, b, p, q) = (inp[0], inp[1], inp[2], inp[3], inp[4]);
-    let mut dp: HashMap<(u64, u64, u64), Mint> = HashMap::new();
-    println!("{}", f(a, b, 0, n, p, q, &mut dp));
+    let mut dp = vec![vec![vec![Mint(0); 2]; n + 1]; n + 1];
+
+    for j in 0..=n {
+        dp[n][j][0] = Mint(1);
+        dp[n][j][1] = Mint(1);
+    }
+    for i in 0..=n {
+        dp[i][n][0] = Mint(0);
+        dp[i][n][1] = Mint(0);
+    }
+
+    for i in (a..n).rev() {
+        for j in (b..n).rev() {
+            // t = 0
+            dp[i][j][0] = Mint(0);
+            for x in 1..=p {
+                dp[i][j][0] = dp[i][j][0] + dp[n.min(i + x)][j][1];
+            }
+            dp[i][j][0] = dp[i][j][0] / Mint(p as u64);
+            // t = 1
+            dp[i][j][1] = Mint(0);
+            for x in 1..=q {
+                dp[i][j][1] = dp[i][j][1] + dp[i][n.min(j + x)][0];
+            }
+            dp[i][j][1] = dp[i][j][1]  / Mint(q as u64);
+        }
+    }
+
+    println!("{}", dp[a][b][0]);
 }
 
 #[derive(Debug, Copy, Clone)]

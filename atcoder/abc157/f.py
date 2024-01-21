@@ -40,10 +40,10 @@ class Circle:
             return '外切', [(x3, y3)]
 
         # d < R - r
-        if d < R - r + eps:
+        if d < R - r - eps:
             return '內離', None
 
-        # d > R + R
+        # d > R + r
         if d > R + r + eps:
             return '外離', None
 

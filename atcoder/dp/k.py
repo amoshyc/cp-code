@@ -1,9 +1,7 @@
 N, K = map(int, input().split())
 A = [int(x) for x in input().split()]
 
-# dp[i][j] = True if Taro will win else False when
-#   i stones remining and
-#   it is (Taro if j == 0 else Jiro)'s turn
+# dp[i][j] = True if j will win when it's j's turn and i stones remained
 dp = [[-1, -1] for i in range(K + 1)]
 dp[0][0] = False
 dp[0][1] = False

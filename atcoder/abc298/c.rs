@@ -5,23 +5,21 @@ use std::collections::{BTreeSet, HashMap};
 fn main() {
     let n = read::<usize>();
     let q = read::<usize>();
-    let mut boxes = vec![BTreeSet::new(); n];
+    let mut boxes = HashMap::new();
     let mut belong = HashMap::new();
 
     for qid in 0..q {
         let inp = readv::<usize>();
 
         if inp[0] == 1 {
-            let (i, j) = (inp[1], inp[2] - 1);
-            boxes[j].insert((i, qid));
+            let (i, j) = (inp[1], inp[2]);
+            boxes.entry(j).or_insert(BTreeSet::new()).insert((i, qid));
             belong.entry(i).or_insert(BTreeSet::new()).insert(j);
         } else if inp[0] == 2 {
-            let i = inp[1] - 1;
-            let ans = boxes[i].iter().map(|&(x, _)| x).collect::<Vec<_>>();
+            let ans = boxes[&inp[1]].iter().map(|&(x, _)| x).collect::<Vec<_>>();
             println!("{}", join(&ans, " "));
         } else {
-            let i = inp[1];
-            let ans = belong[&i].iter().map(|&bid| bid + 1).collect::<Vec<_>>();
+            let ans = belong[&inp[1]].iter().collect::<Vec<_>>();
             println!("{}", join(&ans, " "));
         }
     }

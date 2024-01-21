@@ -1,8 +1,9 @@
 fn main() {
-    let s = read::<String>();
-    let t = read::<String>();
-    let ans = if s.contains(&t) { "Yes" } else { "No" };
-    println!("{}", ans);
+    let s = reads();
+    let t = reads();
+    let x = t.as_slice();
+    let idx = s.windows(t.len()).position(|w| w == x);
+    println!("{}", if idx.is_some() { "Yes" } else { "No" });
 }
 
 fn read<T: std::str::FromStr>() -> T {
@@ -18,6 +19,6 @@ fn read<T: std::str::FromStr>() -> T {
 //         .collect()
 // }
 
-// fn reads() -> Vec<char> {
-//     read::<String>().chars().collect::<Vec<char>>()
-// }
+fn reads() -> Vec<char> {
+    read::<String>().chars().collect::<Vec<char>>()
+}

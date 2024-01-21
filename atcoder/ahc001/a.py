@@ -27,7 +27,8 @@ def solve(requests):
 
     for t in range(3000):
         area = box_area(boxes)
-        prob = np.abs(np.log(area) - np.log(requests[:, 2]))
+        prob = np.log(requests[:, 2]) - np.log(area)
+        prob = np.clip(prob, 0, None)
         prob = prob / prob.sum()
         idx = np.random.choice(np.arange(N), p=prob)
         # idx = np.random.randint(0, N)

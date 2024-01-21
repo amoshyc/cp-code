@@ -25,16 +25,18 @@
 fn main() {
     let n = read::<usize>();
     let arr = readv::<usize>();
-    let a = arr.iter().filter(|&&x| x == 3).count();
-    let b = arr.iter().filter(|&&x| x == 2).count();
-    let c = arr.iter().filter(|&&x| x == 1).count();
+    
+    let mut cnt = vec![0; 4];
+    for &x in arr.iter() {
+        cnt[x] += 1;
+    }
 
-    let sum = a + b + c;
+    let sum = cnt[1] + cnt[2] + cnt[3];
     let mut dp = vec![vec![vec![0.0 as f64; sum + 1]; sum + 1]; sum + 1];
     dp[0][0][0] = 0.0;
     for x in 0..=sum {
-        for y in 0..=sum {
-            for z in 0..=sum {
+        for y in 0..=(sum - x) {
+            for z in 0..=(sum - x - y) {
                 if (x, y, z) == (0, 0, 0) {
                     continue;
                 }
@@ -53,7 +55,7 @@ fn main() {
         }
     }
 
-    println!("{:.12}", dp[a][b][c]);
+    println!("{:.12}", dp[cnt[3]][cnt[2]][cnt[1]]);
 }
 
 fn read<T: std::str::FromStr>() -> T {

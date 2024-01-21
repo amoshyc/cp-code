@@ -1,12 +1,10 @@
 fn main() {
     let s = reads();
     let a = s.iter().fold(0, |acc, &x| {
-        if x == 'w' {
-            acc + 2
-        } else if x == 'v' {
-            acc + 1
-        } else {
-            acc
+        match x {
+            'w' => acc + 2,
+            'v' => acc + 1,
+            _ => acc
         }
     });
     println!("{}", a);

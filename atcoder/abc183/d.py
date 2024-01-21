@@ -8,9 +8,10 @@ for _ in range(N):
 
 events.sort()
 cum_sum = 0
-max_need = -1
 for (t, p) in events:
     cum_sum += p
-    max_need = max(max_need, cum_sum)
-
-print('Yes' if max_need <= W else 'No')
+    if cum_sum > W:
+        print('No')
+        break
+else:
+    print('Yes')

@@ -20,22 +20,18 @@ int main() {
         }
     }
 
-    // dp[S][i] = number of way to pair set S men with [0, i)
-    // dp[S][i] is valid when len(S) = i
-    // dp[S][i] -> dp[i + 1][S | j] for j not in S and A[i, j] = 1
+    // dp[i][S] = number of way to pair set S men with [0, i)
+    // dp[i][S] is valid when len(S) = i
+    // dp[i][S] -> dp[i + 1][S | j] for j not in S and A[i, j] = 1
 
     auto dp = vector<vector<ll>>(N + 1, vector<ll>(1 << N, 0));
     dp[0][0] = 1;
-    for (int i = 0; i < N; i++) {
-        for (int S = 0; S < (1 << N); S++) {
-            if (i != __builtin_popcount(S)) {
-                continue;
-            }
-            for (int j = 0; j < N; j++) {
-                if ((S & (1 << j)) == 0 and A[i][j] == 1) {
-                    dp[i + 1][S | (1 << j)] += dp[i][S];
-                    dp[i + 1][S | (1 << j)] %= M;
-                }
+    for (int S = 0; S < (1 << N); S++) {
+        int i = __builtin_popcount(S);
+        for (int j = 0; j < N; j++) {
+            if ((S & (1 << j)) == 0 and A[i][j] == 1) {
+                dp[i + 1][S | (1 << j)] += dp[i][S];
+                dp[i + 1][S | (1 << j)] %= M;
             }
         }
     }

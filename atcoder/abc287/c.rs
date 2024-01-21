@@ -15,11 +15,11 @@ fn main() {
         adj[v].push(u);
     }
 
-    let (nodes, _, _) = bfs(&adj, 0, std::usize::MAX);
+    let (nodes, _, _) = bfs(&adj, 0);
     let s = nodes[nodes.len() - 1];
-    let (nodes, parent, depth) = bfs(&adj, s, std::usize::MAX);
+    let (nodes, parent, depth) = bfs(&adj, s);
     let t = nodes[nodes.len() - 1];
-    let diameter = *depth.get(&t).unwrap();
+    let diameter = depth[t];
 
     // println!("{}", diameter);
 
@@ -30,29 +30,24 @@ fn main() {
     }
 }
 
-
-fn bfs(
-    adj: &Vec<Vec<usize>>,
-    root: usize,
-    par: usize,
-) -> (Vec<usize>, HashMap<usize, usize>, HashMap<usize, usize>) {
+fn bfs(adj: &Vec<Vec<usize>>, root: usize) -> (Vec<usize>, Vec<usize>, Vec<usize>) {
+    let n = adj.len();
     let mut nodes = vec![];
-    let mut parent = HashMap::new();
-    let mut depth = HashMap::new();
+    let mut parent = vec![std::usize::MAX; n];
+    let mut depth = vec![std::usize::MAX; n];
     let mut queue = VecDeque::new();
 
-    parent.insert(root, par);
-    depth.insert(root, 0);
+    parent[root] = root;
+    depth[root] = 0;
 
-    queue.push_back((root, par));
-    while !queue.is_empty() {
-        let (u, p) = queue.pop_front().unwrap();
+    queue.push_back(root);
+    while let Some(u) = queue.pop_front() {
         nodes.push(u);
         for &v in adj[u].iter() {
-            if v != p && !parent.contains_key(&v) {
-                parent.insert(v, u);
-                depth.insert(v, depth[&u] + 1);
-                queue.push_back((v, u));
+            if parent[v] == std::usize::MAX {
+                parent[v] = u;
+                depth[v] = depth[u] + 1;
+                queue.push_back(v);
             }
         }
     }

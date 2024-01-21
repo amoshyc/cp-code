@@ -1,20 +1,20 @@
-N = int(input()) - 1
+def solve():
+    N = int(input())
 
-lb, ub = 0, 0
-
-for n_digit in range(1, 20):
-    lb = ub
-    ub = (ub + 1) * 26
-    # print(n_digit, lb, ub)
-
-    if lb <= N < ub:
-        off = N - lb
-        ans = ['a' for _ in range(n_digit)]
-        idx = 1
-        while off > 0:
-            ans[-idx] = chr(ord('a') + off % 26)
-            off //= 26
-            idx += 1
-        
-        print(''.join(ans))
-        break
+    lb, ub = 0, 0
+    for n_digit in range(1, 100):
+        lb = ub + 1
+        ub = (ub + 1) * 26
+        if lb <= N <= ub:
+            off = N - lb
+            res = []
+            while off > 0:
+                off, r = divmod(off, 26)
+                res.append(r)
+            while len(res) < n_digit:
+                res.append(0)
+            res.reverse()
+            res = ''.join([chr(ord('a') + x) for x in res])
+            return res
+    
+print(solve())

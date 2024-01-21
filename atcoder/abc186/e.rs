@@ -1,18 +1,6 @@
 #![allow(unused)]
 
 fn main() {
-    // ax = c (mod b) has solution
-    //   x = x0 + k b/g where 
-    //   g = gcd(a, b)
-    //   x0 = minv(a / g, b / g) * c/g
-    // if g divides c
-
-    // ax + by = c has solution
-    //   x = c/g x0 + k b/g where k is int
-    //   y = c/g y0 + k a/g where k is int
-    //   x0, y0 is the result of extgcd(a, b)
-    // if g divides c
-
     let tc = read::<usize>();
     let mut ans = vec![];
     for t in 0..tc {
@@ -20,18 +8,8 @@ fn main() {
         let (n, s, k) = (inp[0], inp[1], inp[2]);
 
         // s + kx = 0 (mod n)
-        // kx = -s (mod n) has solution:
-        // x = x0 + k b/g where k is int, x0 = minv(k / g, n / g) * (-s / g)
-        // To find the minimum x such that x >= 0, 
-        // xmin = x0 mod b/g
-        let g = gcd(k, n);
-        if (-s).rem_euclid(g) != 0 {
-            ans.push(-1);
-        } else {
-            let x0 = minv(k / g, n / g) * (-s) / g;
-            let x = x0.rem_euclid(n / g);
-            ans.push(x);
-        }
+        // kx = -s (mod n)
+        ans.push(linear_congruence(k, -s, n).unwrap_or(-1));
     }
 
     println!("{}", join(&ans, "\n"));
@@ -45,25 +23,6 @@ fn gcd(a: i64, b: i64) -> i64 {
     }
 }
 
-// extgcd finds a (x0, y0) given (a, b) in equation
-// ax + by = g
-
-// In gcd, we have
-// gcd(a, b) = gcd(b, a mod b)
-// that is,
-// g = a * x0 + b y0             (1)
-// g = b * x1 + (a mod b) y1     (2)
-// ...
-// g = g * 1 + 0 * 0
-
-// if we know (2), then (1) can be found using:
-// g = b * x1 + (a mod b) y1
-// g = b * x1 + (a - floor(a / b) * b) y1
-// g = a * y1 + b (x1 - y1 * floor(a / b))
-// that is,
-// x0 = y1
-// y0 = x1 - y1 * floor(a / b)
-
 fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     if b == 0 {
         (1, 0, a) // (x0, y0, g)
@@ -73,10 +32,20 @@ fn extgcd(a: i64, b: i64) -> (i64, i64, i64) {
     }
 }
 
-// Find the x of ax = 1 (mod m)
 fn minv(a: i64, m: i64) -> i64 {
     let (x0, _, _) = extgcd(a, m);
     x0.rem_euclid(m)
+}
+
+// ax = b (mod m) has solution
+//  x = (a/g)^(-1) * (b/g) (mod m/g)
+fn linear_congruence(a: i64, b: i64, m: i64) -> Option<i64> {
+    let (inv, _, g) = extgcd(a, m);
+    if b % g != 0 {
+        None
+    } else {
+        Some((inv * (b / g)).rem_euclid(m / g))
+    }
 }
 
 fn read<T: std::str::FromStr>() -> T {

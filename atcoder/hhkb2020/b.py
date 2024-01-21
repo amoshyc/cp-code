@@ -1,14 +1,12 @@
 H, W = map(int, input().split())
 S = [input() for _ in range(H)]
 
-ans = set()
+ans = 0
 for r in range(H):
     for c in range(W):
         if S[r][c] == '.':
-            for dr, dc in [(+1, 0), (-1, 0), (0, +1), (0, -1)]:
-                nr = r + dr
-                nc = c + dc
-                if 0 <= nr < H and 0 <= nc < W and S[nr][nc] == '.':
-                    ans.add((min(r, nr), min(c, nc), max(r, nr), max(c, nc)))
-# print(ans)
-print(len(ans))
+            if r + 1 < H and S[r + 1][c] == '.':
+                ans += 1
+            if c + 1 < W and S[r][c + 1] == '.':
+                ans += 1
+print(ans)

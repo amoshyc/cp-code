@@ -15,7 +15,7 @@ fn main() {
         sum += arr[i];
     }
     while smaller.len() > k {
-        let &(x, i) = smaller.iter().rev().next().unwrap();
+        let &(x, i) = smaller.iter().next_back().unwrap();
         larger.insert((x, i));
         smaller.remove(&(x, i));
         sum -= x;
@@ -33,7 +33,7 @@ fn main() {
         }
         
         // Add arr[e]
-        let &(pivot, _) = smaller.iter().rev().next().unwrap_or(&(0, 0));
+        let &(pivot, _) = smaller.iter().next_back().unwrap_or(&(0, 0));
         if arr[e] > pivot {
             larger.insert((arr[e], e));
         } else {
@@ -43,7 +43,7 @@ fn main() {
         
         // Balance
         while smaller.len() > k {
-            let &(x, i) = smaller.iter().rev().next().unwrap();
+            let &(x, i) = smaller.iter().next_back().unwrap();
             larger.insert((x, i));
             smaller.remove(&(x, i));
             sum -= x;

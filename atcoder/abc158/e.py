@@ -5,11 +5,13 @@ N, P = map(int, input().split())
 S = list(map(int, input()))
 
 answer = 0
-if P == 2 or P == 5:
-    for j in range(N - 1, -1, -1): # enumerate right endpoint
+if P == 2 or P == 5: # Case when only last digit matters
+    for j in range(N - 1, -1, -1): # Enumerate right endpoint
         if S[j] % P == 0:
             answer += j + 1
-else:
+else: 
+    # Enuerate left endpoint from right to left
+    # Find number of right endpoints that make the substr % P == 0
     cnts = defaultdict(int)
     suffix = 0
     base = 1

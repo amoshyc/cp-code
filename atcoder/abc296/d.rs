@@ -1,25 +1,16 @@
 #![allow(unused)]
 
 fn main() {
-    let inp = readv::<u128>();
+    let inp = readv::<u64>();
     let (n, m) = (inp[0], inp[1]);
 
     if n * n < m {
         println!("-1");
         return;
     }
-    if m == 1 {
-        println!("1");
-        return;
-    }
 
-    let mut x = 1;
-    while x * x < m {
-        x += 1;
-    }
-
-    let mut ans = std::u128::MAX;
-    for i in 1..=x {
+    let mut ans = std::u64::MAX;
+    for i in 1..=n.min(1_000_000) {
         let q = (m + (i - 1)) / i;
         if q <= n {
             ans = ans.min(i * q);

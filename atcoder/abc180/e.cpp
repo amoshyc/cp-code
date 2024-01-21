@@ -36,9 +36,9 @@ int main() {
             if (s & (1 << v)) {
                 for (int u = 0; u < N; u++) {
                     if ((s & (1 << u))) {
-                        ll val =
-                            dp[s ^ (1 << v)][u] + dist(cities[u], cities[v]);
-                        dp[s][v] = min(dp[s][v], val);
+                        dp[s][v] =
+                            min(dp[s][v], dp[s ^ (1 << v)][u] +
+                                              dist(cities[u], cities[v]));
                     }
                 }
             }
@@ -46,7 +46,7 @@ int main() {
     }
 
     ll ans = inf;
-    for (int v = 1; v < N; v++) {
+    for (int v = 0; v < N; v++) {
         ans = min(ans, dp[(1 << N) - 1][v] + dist(cities[v], cities[0]));
     }
     cout << ans << endl;

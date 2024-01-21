@@ -1,68 +1,104 @@
-use std::collections::HashSet;
-use std::collections::VecDeque;
-
-type Set = HashSet<usize>;
-type Que = VecDeque<(i32, i32)>;
+#![allow(unused)]
 
 fn main() {
     let inp = readv::<usize>();
-    let (h, w) = (inp[0], inp[1]);
+    let (n, m) = (inp[0], inp[1]);
     let mut arr = vec![];
-    for _ in 0..h {
+    for _ in 0..n {
         arr.push(reads());
     }
 
-    let mut sr = 0;
-    let mut sc = 0;
-    for r in 0..h {
-        for c in 0..w {
+    let mut dsu = DSU::new(n * m);
+    for r in 0..n {
+        for c in 1..m {
+            if (arr[r][c - 1], arr[r][c]) == ('.', '.') {
+                let u = r * m + c - 1;
+                let v = r * m + c;
+                dsu.unite(u, v);
+            }
+        }
+    }
+    for c in 0..m {
+        for r in 1..n {
+            if (arr[r - 1][c], arr[r][c]) == ('.', '.') {
+                let u = (r - 1) * m + c;
+                let v = r * m + c;
+                dsu.unite(u, v);
+            }
+        }
+    }
+
+    let mut adjs = vec![];
+    for r in 0..n {
+        for c in 0..m {
             if arr[r][c] == 'S' {
-                sr = r as i32;
-                sc = c as i32;
+                for (dr, dc) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
+                    let nr = r.checked_add_signed(dr).unwrap_or(n);
+                    let nc = c.checked_add_signed(dc).unwrap_or(m);
+                    if nr < n && nc < m && arr[nr][nc] == '.' {
+                        adjs.push((nr, nc));
+                    }
+                }
             }
         }
     }
 
-    let edges = [(-1, 0), (1, 0), (0, 1), (0, -1)];
-    let mut vis = vec![vec![Set::new(); w]; h];
-    for (i, (dr, dc)) in edges.iter().enumerate() {
-        let (root_r, root_c) = (sr + dr, sc + dc);
-
-        if !(0..h).contains(&us(root_r)) || !(0..w).contains(&us(root_c)) {
-            continue;
-        }
-        if arr[us(root_r)][us(root_c)] != '.' {
-            continue;
-        }
-
-        let mut que = Que::new();
-        que.push_back((root_r, root_c));
-        vis[root_r as usize][root_c as usize].insert(i);
-
-        while !que.is_empty() {
-            let (r, c) = que.pop_front().unwrap();
-            for (rr, cc) in edges.iter() {
-                let (nr, nc) = (r + rr, c + cc);
-
-                if !(0..h).contains(&us(nr)) || !(0..w).contains(&us(nc)) {
-                    continue;
-                }
-                if vis[us(nr)][us(nc)].contains(&i) || arr[us(nr)][us(nc)] != '.' {
-                    continue;
-                }
-
-                vis[us(nr)][us(nc)].insert(i);
-                que.push_back((nr, nc));
+    let mut ans = "No";
+    for i in 0..adjs.len() {
+        for j in (i + 1)..adjs.len() {
+            let (ri, ci) = adjs[i];
+            let (rj, cj) = adjs[j];
+            let u = ri * m + ci;
+            let v = rj * m + cj;
+            if dsu.same(u, v) {
+                ans = "Yes";
             }
         }
     }
 
-    let ans = vis.iter().any(|row| row.iter().any(|v| v.len() >= 2));
-    println!("{}", if ans { "Yes" } else { "No" });
+    println!("{}", ans);
 }
 
-fn us(i: i32) -> usize {
-    return i as usize;
+struct DSU {
+    par: Vec<usize>,
+    siz: Vec<usize>,
+}
+
+impl DSU {
+    fn new(n: usize) -> Self {
+        Self {
+            par: (0..n).collect(),
+            siz: vec![1; n],
+        }
+    }
+
+    fn root(&mut self, u: usize) -> usize {
+        if self.par[u] == u {
+            u
+        } else {
+            self.par[u] = self.root(self.par[u]);
+            self.par[u]
+        }
+    }
+
+    fn unite(&mut self, mut u: usize, mut v: usize) {
+        u = self.root(u);
+        v = self.root(v);
+        if u == v {
+            return;
+        }
+        if self.siz[u] > self.siz[v] {
+            self.par[v] = u;
+            self.siz[u] += self.siz[v];
+        } else {
+            self.par[u] = v;
+            self.siz[v] += self.siz[u];
+        }
+    }
+
+    fn same(&mut self, u: usize, v: usize) -> bool {
+        self.root(u) == self.root(v)
+    }
 }
 
 fn read<T: std::str::FromStr>() -> T {
@@ -82,9 +118,13 @@ fn reads() -> Vec<char> {
     read::<String>().chars().collect::<Vec<char>>()
 }
 
-// fn join<T: ToString>(v: &[T], sep: &str) -> String {
-//     v.iter()
-//         .map(|x| x.to_string())
-//         .collect::<Vec<String>>()
-//         .join(sep)
-// }
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
+}
+
+fn join<T: ToString>(arr: &[T], sep: &str) -> String {
+    arr.iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<String>>()
+        .join(sep)
+}

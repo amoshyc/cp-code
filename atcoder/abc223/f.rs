@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 fn main() {
     let inp = readv::<usize>();
     let (n, q) = (inp[0], inp[1]);
@@ -9,8 +11,7 @@ fn main() {
         p[i] = p[i - 1] + if s[i] == '(' { 1 } else { -1 };
     }
 
-    let mut seg = SegTree::new(n);
-    seg.init(&p);
+    let mut seg = SegTree::<Node>::from_vec(&p);
 
     let mut ans = vec![];
     for _ in 0..q {
@@ -19,21 +20,21 @@ fn main() {
 
         if cmd == 1 {
             if s[l] == '(' && s[r] == ')' {
-                seg.apply(l, r, -2, 0, 0, seg.nn);
+                seg.set(l, r, -2, 0, 0, seg.nn);
                 s.swap(l, r);
             } else if s[l] == ')' && s[r] == '(' {
-                seg.apply(l, r, 2, 0, 0, seg.nn);
+                seg.set(l, r, 2, 0, 0, seg.nn);
                 s.swap(l, r);
             }
         } else {
             let ok1 = s[l] == '(' && s[r] == ')';
-            let ok2 = seg.prod(r, r + 1, 0, 0, seg.nn)
+            let ok2 = seg.get(r, r + 1, 0, 0, seg.nn)
                 == if l > 0 {
-                    seg.prod(l - 1, l, 0, 0, seg.nn)
+                    seg.get(l - 1, l, 0, 0, seg.nn)
                 } else {
                     0
                 };
-            let ok3 = seg.prod(l, r + 1, 0, 0, seg.nn) == seg.prod(l, l + 1, 0, 0, seg.nn) - 1;
+            let ok3 = seg.get(l, r + 1, 0, 0, seg.nn) == seg.get(l, l + 1, 0, 0, seg.nn) - 1;
 
             if ok1 && ok2 && ok3 {
                 ans.push("Yes");
@@ -45,97 +46,109 @@ fn main() {
     println!("{}", join(&ans, "\n"));
 }
 
-type S = i32;
-type F = i32;
+struct Node;
+impl SegTrait for Node {
+    type S = i32;
+    type F = i32;
+    fn default_data() -> Self::S {
+        0x3f3f3f3f
+    }
+    fn default_lazy() -> Self::F {
+        0
+    }
+    fn op(a: Self::S, b: Self::S) -> Self::S {
+        a.min(b)
+    }
+    fn apply_lazy(lazy: Self::F, data: Self::S, u: usize, l: usize, r: usize) -> Self::S {
+        (lazy as Self::S) + data
+    }
+    fn merge_lazy(parent: Self::F, child: Self::F) -> Self::F {
+        parent + child
+    }
+}
 
-fn default_data() -> S {
-    0x3f3f3f3f
-}
-fn default_lazy() -> F {
-    0
-}
-fn op(a: S, b: S) -> S {
-    std::cmp::min(a, b)
-}
-fn apply_lazy(lazy: F, data: S, _u: usize, _l: usize, _r: usize) -> S {
-    (lazy as S) + data
-}
-fn merge_lazy(parent: F, child: F) -> F {
-    parent + child
+trait SegTrait {
+    type S: Clone;
+    type F: Clone + PartialEq;
+    fn default_data() -> Self::S;
+    fn default_lazy() -> Self::F;
+    fn op(a: Self::S, b: Self::S) -> Self::S;
+    fn apply_lazy(lazy: Self::F, data: Self::S, u: usize, l: usize, r: usize) -> Self::S;
+    fn merge_lazy(parent: Self::F, child: Self::F) -> Self::F;
 }
 
-struct SegTree {
+struct SegTree<T: SegTrait> {
     nn: usize,
-    data: Vec<S>,
-    lazy: Vec<F>,
+    data: Vec<T::S>,
+    lazy: Vec<T::F>,
 }
 
-impl SegTree {
-    fn new(n: usize) -> SegTree {
+impl<T: SegTrait> SegTree<T> {
+    fn new(n: usize) -> Self {
         let nn = n.next_power_of_two();
-        SegTree {
-            nn,
-            data: vec![default_data(); 2 * nn],
-            lazy: vec![default_lazy(); 2 * nn],
-        }
+        let data = vec![T::default_data(); 2 * nn];
+        let lazy = vec![T::default_lazy(); 2 * nn];
+        Self { nn, data, lazy }
     }
 
-    fn init(&mut self, arr: &[S]) {
-        let s = self.nn - 1;
+    fn from_vec(arr: &Vec<T::S>) -> Self {
+        let nn = arr.len().next_power_of_two();
+        let mut data = vec![T::default_data(); 2 * nn];
+        let lazy = vec![T::default_lazy(); 2 * nn];
+        let s = nn - 1;
         let t = s + arr.len();
-        self.data[s..t].clone_from_slice(arr);
-        for u in (0..(self.nn - 1)).rev() {
-            self.data[u] = op(self.data[2 * u + 1], self.data[2 * u + 2]);
+        data[s..t].clone_from_slice(arr);
+        for u in (0..s).rev() {
+            data[u] = T::op(data[2 * u + 1].clone(), data[2 * u + 2].clone());
         }
+        Self { nn, data, lazy }
     }
 
     fn push(&mut self, u: usize, l: usize, r: usize) {
-        if self.lazy[u] == default_lazy() {
-            return;
+        if self.lazy[u] != T::default_lazy() {
+            let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
+            self.data[lch] = T::apply_lazy(self.lazy[u].clone(), self.data[lch].clone(), lch, l, m);
+            self.data[rch] = T::apply_lazy(self.lazy[u].clone(), self.data[rch].clone(), rch, m, r);
+            self.lazy[lch] = T::merge_lazy(self.lazy[u].clone(), self.lazy[lch].clone());
+            self.lazy[rch] = T::merge_lazy(self.lazy[u].clone(), self.lazy[rch].clone());
+            self.lazy[u] = T::default_lazy();
         }
-        let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
-        self.data[lch] = apply_lazy(self.lazy[u], self.data[lch], lch, l, m);
-        self.data[rch] = apply_lazy(self.lazy[u], self.data[rch], rch, m, r);
-        self.lazy[lch] = merge_lazy(self.lazy[u], self.lazy[lch]);
-        self.lazy[rch] = merge_lazy(self.lazy[u], self.lazy[rch]);
-        self.lazy[u] = default_lazy();
     }
 
-    fn prod(&mut self, a: usize, b: usize, u: usize, l: usize, r: usize) -> S {
+    fn get(&mut self, a: usize, b: usize, u: usize, l: usize, r: usize) -> T::S {
         // l..r has no intersection with a..b
         if l >= b || r <= a {
-            return default_data();
+            return T::default_data();
         }
         // l..r is inside a..b
         if l >= a && r <= b {
-            return self.data[u];
+            return self.data[u].clone();
         }
         // partially intersect
         let m = (l + r) / 2;
         self.push(u, l, r);
-        op(
-            self.prod(a, b, 2 * u + 1, l, m),
-            self.prod(a, b, 2 * u + 2, m, r),
+        T::op(
+            self.get(a, b, 2 * u + 1, l, m),
+            self.get(a, b, 2 * u + 2, m, r),
         )
     }
 
-    fn apply(&mut self, a: usize, b: usize, x: F, u: usize, l: usize, r: usize) {
-        // l..r has no intersection with a..b
+    fn set(&mut self, a: usize, b: usize, x: T::F, u: usize, l: usize, r: usize) {
         if l >= b || r <= a {
             return;
         }
         // l..r is inside a..b
         if l >= a && r <= b {
-            self.data[u] = apply_lazy(x, self.data[u], u, l, r);
-            self.lazy[u] = merge_lazy(x, self.lazy[u]);
+            self.data[u] = T::apply_lazy(x.clone(), self.data[u].clone(), u, l, r);
+            self.lazy[u] = T::merge_lazy(x.clone(), self.lazy[u].clone());
             return;
         }
         // partially intersect
         let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
         self.push(u, l, r);
-        self.apply(a, b, x, lch, l, m);
-        self.apply(a, b, x, rch, m, r);
-        self.data[u] = op(self.data[lch], self.data[rch]);
+        self.set(a, b, x.clone(), lch, l, m);
+        self.set(a, b, x.clone(), rch, m, r);
+        self.data[u] = T::op(self.data[lch].clone(), self.data[rch].clone());
     }
 }
 
@@ -156,8 +169,8 @@ fn reads() -> Vec<char> {
     read::<String>().chars().collect::<Vec<char>>()
 }
 
-fn join<T: ToString>(v: &[T], sep: &str) -> String {
-    v.iter()
+fn join<T: ToString>(arr: &[T], sep: &str) -> String {
+    arr.iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
         .join(sep)

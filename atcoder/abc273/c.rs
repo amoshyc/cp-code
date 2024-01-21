@@ -9,7 +9,7 @@ fn main() {
     for a in arr {
         // let p = s.partition_point(|&x| x <= a);
         let p = partition_point(&s, |&x| x <= a);
-        let cnt = s.len() - (p);
+        let cnt = s.len() - p;
         ans[cnt] += 1;
     }
 
@@ -41,10 +41,7 @@ fn join<T: ToString>(v: &[T], sep: &str) -> String {
 }
 
 // arr.partition_point is added at 1.52.0
-fn partition_point<P, T>(arr: &[T], mut pred: P) -> usize
-where
-    P: FnMut(&T) -> bool,
-{
+fn partition_point<T, P: FnMut(&T) -> bool>(arr: &[T], mut pred: P) -> usize {
     arr.binary_search_by(|x| {
         if pred(x) {
             std::cmp::Ordering::Less

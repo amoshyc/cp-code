@@ -10,9 +10,7 @@ int N;
 real dp[301][301][301];
 
 real E(int a, int b, int c) {
-    // cout << a << " " << b << " " << c << endl;
-
-    if (dp[a][b][c] >= -0.5) {
+    if (dp[a][b][c] >= 0) {
         return dp[a][b][c];
     }
 
@@ -25,7 +23,7 @@ real E(int a, int b, int c) {
     if (a >= 1) res += real(a) / N * E(a - 1, b, c);
     if (b >= 1) res += real(b) / N * E(a + 1, b - 1, c);
     if (c >= 1) res += real(c) / N * E(a, b + 1, c - 1);
-    res /= real(a + b + c) / N;
+    res *= real(N) / (a + b + c);
 
     dp[a][b][c] = res;
     return res;

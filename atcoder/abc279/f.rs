@@ -5,11 +5,11 @@ fn main() {
     let none = std::usize::MAX;
     let mut num_ball = n;
     let mut dsu = UnionFind::new(n + q);
-    let mut pos = vec![none; n + q]; // ball_id -> box_id
-    let mut top = vec![none; n]; // box_id -> ball_id
+    let mut pos = vec![none; n + q]; // root_ball_id -> box_id
+    let mut any = vec![none; n]; // box_id -> ball_id
     for i in 0..n {
         pos[i] = i;
-        top[i] = i;
+        any[i] = i;
     }
 
     let mut ans = vec![];
@@ -19,22 +19,22 @@ fn main() {
 
         if cmd == 1 {
             let (x, y) = (inp[1] - 1, inp[2] - 1);
-            if top[y] != none {
-                if top[x] != none {
-                    dsu.unite(top[x], top[y]);
+            if any[y] != none {
+                if any[x] != none {
+                    dsu.unite(any[x], any[y]);
                 }
-                top[x] = top[y];
-                top[y] = none;
-                pos[dsu.root(top[x])] = x;
+                any[x] = any[y];
+                any[y] = none;
+                pos[dsu.root(any[x])] = x;
             }
         } else if cmd == 2 {
             let x = inp[1] - 1;
             let b = num_ball;
             num_ball += 1;
-            if top[x] != none {
-                dsu.unite(top[x], b);
+            if any[x] != none {
+                dsu.unite(any[x], b);
             }
-            top[x] = b;
+            any[x] = b;
             pos[dsu.root(b)] = x;
         } else {
             let x = inp[1] - 1;
@@ -74,13 +74,13 @@ struct UnionFind {
 impl UnionFind {
     fn new(n: usize) -> UnionFind {
         UnionFind {
-            parent: vec![std::usize::MAX; n],
+            parent: (0..n).collect(),
             size: vec![1; n],
         }
     }
 
     fn root(&mut self, x: usize) -> usize {
-        if self.parent[x] == std::usize::MAX {
+        if self.parent[x] == x {
             x
         } else {
             self.parent[x] = self.root(self.parent[x]);

@@ -1,77 +1,70 @@
-import bs4
 import time
 import json
-from tqdm import tqdm
+import requests
+from lxml import etree
 from pathlib import Path
-from random import randint
-from urllib.request import urlopen
+from tqdm import tqdm
 
 
-OUT_DIR = Path("cp-code/atcoder")
-OUT_DIR.mkdir(parents=True, exist_ok=True)
+# Retrieve all submissions
+user = "amoshuangyc"
+submissions = []
+start_time = 0
+api = "https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user={}&from_second={}"
 
-# Parse html to get entries
-data = {}  # (contest, problem_id, language) -> Dict
-with open("index.html", encoding="utf-8") as f:
-    rows = bs4.BeautifulSoup(f, "html.parser").select("tbody > tr")
-    for row in tqdm(rows):
-        tds = row.select("td")
-        assert len(tds) == 7
+while True:
+    url = api.format(user, start_time)
+    time.sleep(3)
+    print(url)
+    items = requests.get(url).json()
+    if len(items) == 0:
+        break
+    submissions.extend([item for item in items if item["result"] == "AC"])
+    max_time = max([item["epoch_second"] for item in items])
+    start_time = max(start_time, max_time) + 1
 
-        date = tds[0].select_one("div").get_text().strip()
+submissions.sort(key=lambda item: item["epoch_second"])
 
-        problem_url = tds[1].select_one("a").get("href")
-        token = problem_url.split("/")[-1].lower()
-        index = token.rfind("_")
-        contest = token[:index]
-        problem_id = token[index + 1 :]
+with open("submissions.json", "w") as f:
+    json.dump(submissions, f, indent=1)
 
-        result = tds[3].select_one("span").get_text().strip()
-        if result != "AC":
-            continue
+with open("submissions.json") as f:
+    submissions = json.load(f)
 
-        language = tds[4].get_text().strip()
-        if "rust" in language.lower():
-            suffix = "rs"
-        elif "python" in language.lower() or "pypy" in language.lower():
-            suffix = "py"
-        elif "c++" in language.lower():
-            suffix = "cpp"
-        else:
-            print(language)
-            assert False
 
-        source_code_path = OUT_DIR / contest / f"{problem_id}.{suffix}"
-
-        item = {
-            "date": date,
-            "contest": contest,
-            "problem_id": problem_id,
-            "problem_url": problem_url,
-            "language": language,
-            "submission_url": tds[5].select_one("a").get("href"),
-            "source_code_path": str(source_code_path.as_posix()),
-        }
-
-        key = (item["contest"], item["problem_id"], item["language"])
-        if key not in data or date < data[key]["date"]:
-            data[key] = item
-
-data = list(data.values())
-with open("index.json", "w") as f:
-    json.dump(data, f, indent=1)
+# Group the submissions by problem and language
+# (problem_id, language) -> url
+urls = dict()
+for item in submissions:
+    language = item["language"].lower()
+    if "python" in language or "pypy" in language:
+        language = "py"
+    elif "rust" in language:
+        language = "rs"
+    elif "c++" in language:
+        language = "cpp"
+    else:
+        assert False
+    url = f"https://atcoder.jp/contests/{item['contest_id']}/submissions/{item['id']}"
+    urls[(item["problem_id"], language)] = url
 
 
 # Crawl
-for item in tqdm(data):
-    with urlopen(item["submission_url"], timeout=5) as response:
-        html = response.read().decode("utf-8")
-    dom = bs4.BeautifulSoup(html, "html.parser")
-    code = dom.select_one("#submission-code").get_text()
+out_dir = Path("atcoder")
+out_dir.mkdir(parents=True, exist_ok=True)
 
-    path = Path(item["source_code_path"])
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
+for (problem_id, language), url in tqdm(urls.items()):
+    index = problem_id.rfind("_")
+    contest = problem_id[:index]
+    problem = problem_id[(index + 1) :]
+    file = out_dir / contest / f"{problem}.{language}"
+    file.parent.mkdir(parents=True, exist_ok=True)
+
+    time.sleep(2)
+    html = requests.get(url)
+    tree = etree.HTML(html.content.decode("utf-8"))
+    code = tree.xpath('//pre[@id="submission-code"]//text()')[0]
+    code = "\n".join(code.split("\r\n"))
+
+    with open(file, "w", encoding="utf-8") as f:
         f.write(code)
-
-    time.sleep(randint(2, 4))

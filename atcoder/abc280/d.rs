@@ -4,38 +4,22 @@ fn main() {
     let sieve = SieveOfEratosthenes::new(1_000_000);
     let factors = sieve.factorize(k);
 
-    let mut need = std::collections::HashMap::<u64, u64>::new();
-    let mut max_prime_over = 1;
+    let mut ans = 1;
     for &(p, e) in factors.iter() {
-        need.insert(p, e);
-        if e == 1 && p >= 1_000_000 {
-            max_prime_over = std::cmp::max(max_prime_over, p);
-        }
-    }
-
-    if max_prime_over != 1 {
-        println!("{}", max_prime_over);
-        return;
-    }
-
-    // println!("{:?}", need);
-    
-    for i in 2..=k {
-        for (p, e) in sieve.factorize(i) {
-            if need.contains_key(&p) {
-                need.entry(p).and_modify(|x| *x = (*x).saturating_sub(e));
-                if need[&p] == 0 {
-                    need.remove(&p);
-                }
+        let mut v = 0;
+        let mut c = 0;
+        while c < e {            
+            v += p;
+            let mut x = v;
+            while x % p == 0 {
+                x /= p;
+                c += 1;
             }
         }
-        
-        // println!("{} {:?}", i, need);
-        if need.len() == 0 {
-            println!("{}", i);
-            break;
-        }
+        ans = std::cmp::max(ans, v);
     }
+
+    println!("{}", ans);
 }
 
 

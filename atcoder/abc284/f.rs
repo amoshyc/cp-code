@@ -3,8 +3,8 @@
 fn main() {
     let n = read::<usize>();
     let t = reads();
-    let a: Vec<u64> = t.iter().map(|&c| c as u64 - 'a' as u64 + 1).collect();
-    let b: Vec<u64> = t.iter().rev().map(|&c| c as u64 - 'a' as u64 + 1).collect();
+    let a: Vec<u64> = t.iter().map(|&c| c as u64).collect();
+    let b: Vec<u64> = t.iter().rev().map(|&c| c as u64).collect();
 
     let h = PolyHasher::new(2 * n, 31, 1_000_000_007);
     let ha = h.hash(&a);
@@ -20,7 +20,8 @@ fn main() {
         let ok1 = h.range(&hb, n - i, n) == h.range(&ha, 0, i);
         let ok2 = h.range(&hb, n, 2 * n - i) == h.range(&ha, n + i, 2 * n);
         if ok1 && ok2 {
-            println!("{}", join(&t[i..i + n].iter().rev().collect::<Vec<_>>(), ""));
+            let s: String = t[i..i + n].iter().rev().collect();
+            println!("{}", s);
             println!("{}", i);
             std::process::exit(0);
         }
@@ -75,8 +76,7 @@ impl PolyHasher {
     fn range(&self, h: &[u64], l: usize, r: usize) -> u64 {
         if l == r {
             0
-        }
-        else if l == 0 {
+        } else if l == 0 {
             h[r - 1]
         } else {
             (self.prime + h[r - 1] - h[l - 1]) % self.prime * self.pinv[l] % self.prime

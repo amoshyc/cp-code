@@ -1,22 +1,16 @@
 #![allow(unused)]
 
 use std::collections::HashSet;
+use std::iter::FromIterator;
 
 fn main() {
     let inp = readv::<usize>();
     let (n, k) = (inp[0], inp[1]);
     let arr = readv::<u32>();
-    let mut s = HashSet::new();
-    for &x in arr.iter() {
-        s.insert(x);
-    }
-    for i in 0..k {
-        if !s.contains(&(i as u32)) {
-            println!("{}", i);
-            return;
-        }
-    }
-    println!("{}", k);
+    let s: HashSet<&u32> = HashSet::from_iter(arr.iter());
+    let k = k as u32;
+    let ans = (0..k).find(|&i| !s.contains(&i)).unwrap_or(k);
+    println!("{}", ans);
 }
 
 fn read<T: std::str::FromStr>() -> T {
