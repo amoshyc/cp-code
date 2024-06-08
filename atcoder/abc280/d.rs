@@ -1,6 +1,6 @@
 fn main() {
     let k = read::<u64>();
-    
+
     let sieve = SieveOfEratosthenes::new(1_000_000);
     let factors = sieve.factorize(k);
 
@@ -8,7 +8,7 @@ fn main() {
     for &(p, e) in factors.iter() {
         let mut v = 0;
         let mut c = 0;
-        while c < e {            
+        while c < e {
             v += p;
             let mut x = v;
             while x % p == 0 {
@@ -22,26 +22,23 @@ fn main() {
     println!("{}", ans);
 }
 
-
 struct SieveOfEratosthenes {
     primes: Vec<u64>,
 }
 
 impl SieveOfEratosthenes {
-    fn new(max_val: usize) -> SieveOfEratosthenes {
-        let mut is_prime = vec![true; max_val + 1];
+    fn new(v: usize) -> Self {
+        let mut is_prime = vec![true; v + 1];
         let mut primes = vec![];
-        for i in 2..=max_val {
+        for i in 2..=v {
             if is_prime[i] {
                 primes.push(i as u64);
-                let mut j = i * i;
-                while j <= max_val {
+                for j in ((i * i)..=v).step_by(i) {
                     is_prime[j] = false;
-                    j += i;
                 }
             }
         }
-        SieveOfEratosthenes { primes }
+        Self { primes }
     }
 
     fn factorize(&self, mut x: u64) -> Vec<(u64, u64)> {

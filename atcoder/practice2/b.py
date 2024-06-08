@@ -1,66 +1,124 @@
-from operator import add
+class LazySegTree:
+    def default_data(self):
+        return 0
 
+    def default_lazy(self):
+        return 0
 
-class SegTree:
-    def __init__(self, A, default, op):
-        self.default = default
-        self.op = op
+    def op(self, a, b):
+        return a + b
 
-        nn = 1
-        while nn < len(A):
-            nn *= 2
-        self.nn = nn
+    def apply_lazy(self, lazy, data, l, r):
+        return lazy + data
 
-        self.data = [default for _ in range(2 * nn)]
-        self.data[nn - 1 : nn - 1 + len(A)] = A
-        for u in range(nn - 2, -1, -1):
-            self.data[u] = op(self.data[2 * u + 1], self.data[2 * u + 2])
+    def merge_lazy(self, parent, child):
+        return parent + child
 
-    # query = [a, b), current at node u with [l, r)
-    def query(self, a: int, b: int, u: int, l: int, r: int) -> int:
-        # [l, r) not in [a, b)
-        if r <= a or l >= b:
-            return self.default
-        # [l, r) is inside [a, b)
-        if a <= l and r <= b:
+    def __init__(self, arr):
+        """
+        Build a segment tree from arr
+        """
+        # Find the next power of 2 of len(arr)
+        self.nn = 1
+        while self.nn < len(arr):
+            self.nn *= 2
+
+        # Init data and lazy of each node
+        self.data = [self.default_data() for _ in range(2 * self.nn)]
+        self.lazy = [self.default_lazy() for _ in range(2 * self.nn)]
+
+        # Copy arr to leaves
+        self.data[self.nn - 1 : self.nn - 1 + len(arr)] = arr
+
+        # Compute the data of internal nodes
+        # In 0-based indexing, left child is 2u + 1, right child is 2u + 2
+        # In 1-based indexing, left child is 2u + 0, right child is 2u + 1
+        for u in range(self.nn - 2, -1, -1):
+            self.data[u] = self.op(self.data[2 * u + 1], self.data[2 * u + 2])
+
+    def push(self, u, l, r):
+        """
+        Pushing at node u, whose corresponding interval is [l, r)
+        """
+        # Do nothing if the lazy is not set
+        if self.lazy[u] == self.default_lazy():
+            return
+        # Otherwise push it downward
+        # 1. Update the data of its lch and rch
+        # 2. Update the lazy of its lch and rch
+        # 3. Reset the lazy of current node
+        m, lch, rch = (l + r) // 2, 2 * u + 1, 2 * u + 2
+        self.data[lch] = self.apply_lazy(self.lazy[u], self.data[lch], l, m)
+        self.data[rch] = self.apply_lazy(self.lazy[u], self.data[rch], m, r)
+        self.lazy[lch] = self.merge_lazy(self.lazy[u], self.lazy[lch])
+        self.lazy[rch] = self.merge_lazy(self.lazy[u], self.lazy[rch])
+        self.lazy[u] = self.default_lazy()
+
+    def query(self, a, b, u, l, r):
+        """
+        Return the result of interval [a, b).
+        Currently we are at node u, whose corresponding interval is [l, r).
+        The user calls the query in the form seg.query(a, b, 0, 0, seg.nn)
+        """
+        # Case 1: [l, r) doesn't intersect with [a, b)
+        # node u is not part of the answer.
+        # Return a value that won't affect answer.
+        if l >= b or r <= a:
+            return self.default_data()
+        # Case 2: [l, r) is inside [a, b]
+        # data at node u is part of the answer.
+        if l >= a and r <= b:
             return self.data[u]
-        # partially overlapped
-        m = (l + r) // 2
-        res1 = self.query(a, b, 2 * u + 1, l, m)
-        res2 = self.query(a, b, 2 * u + 2, m, r)
-        return self.op(res1, res2)
+        # Case 3: [l, r) partially intersect with [a, b)
+        # Recursively go down to the left child and right child
+        # Remember to push before going down.
+        m, lch, rch = (l + r) // 2, 2 * u + 1, 2 * u + 2
+        self.push(u, l, r)
+        result1 = self.query(a, b, lch, l, m)
+        result2 = self.query(a, b, rch, m, r)
+        return self.op(result1, result2)
 
-    # modify = [p, p + 1), current at node u with [l, r)
-    def modify(self, p: int, x: int, u, l, r):
-        # [l, r) not in [a, b)
-        if r <= p or l >= p + 1:
+    def modify(self, a, b, x, u, l, r):
+        """
+        Return the interval [a, b) using lazy x.
+        Currently we are at node u, whose corresponding interval is [l, r).
+        The user calls the modify in the form seg.modify(a, b, x, 0, 0, seg.nn)
+        """
+        # Case 1: [l, r) doesn't intersect with [a, b)
+        # Do nothing
+        if l >= b or r <= a:
             return
-        # [l, r) is inside [a, b)
-        if p <= l and r <= p + 1:
-            self.data[u] += x
+        # Case 2: [l, r) is inside [a, b]
+        # Modify the data of node u and set its lazy.
+        if l >= a and r <= b:
+            self.data[u] = self.apply_lazy(x, self.data[u], l, r)
+            self.lazy[u] = self.merge_lazy(x, self.lazy[u])
             return
-        # partially overlapped
-        m = (l + r) // 2
-        self.modify(p, x, 2 * u + 1, l, m)
-        self.modify(p, x, 2 * u + 2, m, r)
-        self.data[u] = self.op(self.data[2 * u + 1], self.data[2 * u + 2])
+        # Case 3: [l, r) partially intersect with [a, b)
+        # Recursively go down to the left child and right child
+        # Remember to push before going down.
+        # Since the data of left child and right child may be modified,
+        # Recompute the data of this node aftwards.
+        m, lch, rch = (l + r) // 2, 2 * u + 1, 2 * u + 2
+        self.push(u, l, r)
+        self.modify(a, b, x, lch, l, m)
+        self.modify(a, b, x, rch, m, r)
+        self.data[u] = self.op(self.data[lch], self.data[rch])
 
 
 N, Q = map(int, input().split())
 A = [int(x) for x in input().split()]
 
-seg = SegTree(A, default=0, op=add)
+seg = LazySegTree(A)
 
 ans = []
-
 for _ in range(Q):
     cmd = [int(x) for x in input().split()]
-
     if cmd[0] == 0:
-        p, x = cmd[1], cmd[2]
-        seg.modify(p, x, 0, 0, seg.nn)
+        p, x = cmd[1:]
+        seg.modify(p, p + 1, x, 0, 0, seg.nn)
     else:
-        l, r = cmd[1], cmd[2]
+        l, r = cmd[1:]
         ans.append(seg.query(l, r, 0, 0, seg.nn))
 
 print("\n".join(map(str, ans)))

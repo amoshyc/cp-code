@@ -3,29 +3,39 @@
 fn main() {
     let n = read::<usize>();
     let t = reads();
-    let a: Vec<u64> = t.iter().map(|&c| c as u64).collect();
-    let b: Vec<u64> = t.iter().rev().map(|&c| c as u64).collect();
 
-    let h = PolyHasher::new(2 * n, 31, 1_000_000_007);
-    let ha = h.hash(&a);
-    let hb = h.hash(&b);
+    let tt = mapv(&t, |&c| c as u64);
+    let mut r = tt.clone();
+    r.reverse();
 
-    for i in 0..=n {
-        // S = rev(T[i..(i + n)])
-        //   => S = revT[(n - i)..(2n - i)]
-        // S[0..i] = T[0..i]
-        //   => revT[(n - i)..n] = T[0..i]
-        // S[i..n] = T[(n + i)..(2n)]
-        //   => revT[n..(2n - i)] = T[(n + i)..(2n)]
-        let ok1 = h.range(&hb, n - i, n) == h.range(&ha, 0, i);
-        let ok2 = h.range(&hb, n, 2 * n - i) == h.range(&ha, n + i, 2 * n);
+    let hasher = PolyHasher::new(t.len(), 31, 1_000_000_007);
+    let ht = hasher.hash(&tt);
+    let hr = hasher.hash(&r);
+
+    // T = S[..i] + rev(S) + S[i..]
+    // =>
+    //     1. S[..i] = T[..i]
+    //     2. S = rev(T[i..i + n]) = revT[2n - (i + n)..2n - i] = revT[n - i..2n - i]
+    //     3. S[i..] = T[i + n..]
+    // Substitude 2. into 1.:
+    //     revT[n - i..2n - i][..i] = T[..i]
+    //     revT[n - i..n] = T[..i]
+    // Substitude 2. into 3.:
+    //     revT[n - i..2n - i][i..] = T[i + n..]
+    //     revT[n..2n - i] = T[i + n..]
+
+    for i in 0..n {
+        let ok1 = hasher.range(&hr, n - i, n) == hasher.range(&ht, 0, i);
+        let ok2 = hasher.range(&hr, n, 2 * n - i) == hasher.range(&ht, i + n, 2 * n);
         if ok1 && ok2 {
-            let s: String = t[i..i + n].iter().rev().collect();
-            println!("{}", s);
+            let mut s = t[i..i + n].to_vec();
+            s.reverse();
+            println!("{}", join(&s, ""));
             println!("{}", i);
-            std::process::exit(0);
+            return;
         }
     }
+
     println!("-1");
 }
 
@@ -73,13 +83,17 @@ impl PolyHasher {
     }
 
     // l..r
+    // rev(S[l..r]) = revS[(n - r)..(n - l)]
     fn range(&self, h: &[u64], l: usize, r: usize) -> u64 {
+        assert!(l < h.len());
+        assert!(r <= h.len());
         if l == r {
             0
         } else if l == 0 {
             h[r - 1]
         } else {
-            (self.prime + h[r - 1] - h[l - 1]) % self.prime * self.pinv[l] % self.prime
+            let ans = (self.prime + h[r - 1] - h[l - 1]) % self.prime * self.pinv[l] % self.prime;
+            ans
         }
     }
 }
@@ -99,6 +113,10 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
 
 fn reads() -> Vec<char> {
     read::<String>().chars().collect::<Vec<char>>()
+}
+
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
 }
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {

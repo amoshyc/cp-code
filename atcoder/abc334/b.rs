@@ -1,31 +1,30 @@
 #![allow(unused)]
 
-// a/b rounds toward zero, therefore
-// when a > 0, we right shift a,
-// when a < 0, a/b is what we want
-fn ceil_div(mut a: i64, mut b: i64) -> i64 {
-    assert!(b != 0);
-    a *= b.signum();
-    b = b.abs();
-    if a >= 0 {
-        (a + b - 1) / b
-    } else {
-        a / b
+// euclidean_div is the same as floor_div.
+// The remainder is always >= 0.
+// a/b (b > 0) rounds toward zero.
+// when a < 0, we left shift the value if needed.
+// when a >= 0, a/b is what we want.
+fn euclidean_div(mut a: i64, mut b: i64) -> (i64, i64) {
+    if b < 0 {
+        a = -a;
+        b = -b;
     }
+    let mut q = a / b;
+    if q < 0 && a % b != 0 {
+        q -= 1;
+    }
+    (q, a - b * q)
 }
 
-// a/b rounds toward zero, therefore
-// when a > 0, a/b is what we want
-// when a < 0, we left shift a.
-fn floor_div(mut a: i64, mut b: i64) -> i64 {
-    assert!(b != 0);
-    a *= b.signum();
-    b = b.abs();
-    if a >= 0 {
-        a / b
-    } else {
-        (a - (b - 1)) / b
-    }
+fn floor_div(a: i64, b: i64) -> i64 {
+    let (q, r) = euclidean_div(a, b);
+    q
+}
+
+fn ceil_div(a: i64, b: i64) -> i64 {
+    let (q, r) = euclidean_div(a, b);
+    q + if r != 0 { 1 } else { 0 }
 }
 
 fn main() {
