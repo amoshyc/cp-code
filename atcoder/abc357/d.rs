@@ -1,19 +1,14 @@
 #![allow(unused)]
 
 fn main() {
-    // S(k - 1) = A^0 + A^1 + ... + A^(k-2)
-    // S(k) = A^0 + A^1 + ... + A^(k-2) + A^(k-1)
-    //      = A * S(k - 1) + 1
+    let n = read::<u64>();
+    let m = 998244353;
+    let d = n.to_string().chars().collect::<Vec<char>>().len();
+    let b = 10u64.pow(d as u32) % m;
 
-    // [ S(k) ] = [ A   1 ] [ S(k-1) ]
-    // [  1   ] = [ 0   1 ] [   1    ]
-
-    let inp = readv::<u64>();
-    let (a, x, m) = (inp[0], inp[1], inp[2]);
-
-    let mat = vec![vec![a, 1], vec![0, 1]];
-    let mat = matpow(&mat, x - 1, m);
-    let ans = (mat[0][0] + mat[0][1]) % m;
+    let mat = vec![vec![b, 1], vec![0, 1]];
+    let mat = matpow(&mat, n, m);
+    let ans = mat[0][1] * (n % m) % m;
     println!("{}", ans);
 }
 

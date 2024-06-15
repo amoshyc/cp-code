@@ -20,21 +20,20 @@ fn main() {
     }
 
     let mut cnt = vec![-1 as i64; n];
-    let mut que = VecDeque::new();
     for i in 0..num_scc {
         if scc[i].len() >= 2 || (scc[i].len() == 1 && adj[scc[i][0]][0] == scc[i][0]) {
+            let mut que = VecDeque::new();
             for u in scc[i].iter() {
                 cnt[*u] = scc[i].len() as i64;
                 que.push_back(*u);
             }
-        }
-    }
-
-    while let Some(u) = que.pop_front() {
-        for &v in inv[u].iter() {
-            if cnt[v] == -1 {
-                cnt[v] = cnt[u] + 1;
-                que.push_back(v);
+            while let Some(u) = que.pop_front() {
+                for &v in inv[u].iter() {
+                    if cnt[v] == -1 {
+                        cnt[v] = cnt[u] + 1;
+                        que.push_back(v);
+                    }
+                }
             }
         }
     }
