@@ -1,5 +1,6 @@
 import time
 import json
+import random
 import requests
 from lxml import etree
 from pathlib import Path
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     if submissions_path.exists():
         with submissions_path.open() as f:
             prev_crawled = set(tuple(x) for x in json.load(f))
-    submissions = get_all_submissions("amoshuangyc", max_page=None)
+    submissions = get_all_submissions("amoshuangyc", max_page=5)
     new_items = sorted(submissions - prev_crawled, reverse=True)
     print("#submissions:", len(submissions))
     print("#new_items:", len(new_items))
@@ -72,7 +73,7 @@ if __name__ == "__main__":
         with path.open("w") as f:
             f.write(code)
 
-        time.sleep(5)
+        time.sleep(random(3, 7))
 
     with submissions_path.open("w") as f:
         json.dump(list(submissions), f, indent=1)
