@@ -73,7 +73,7 @@ if __name__ == "__main__":
         with path.open("w") as f:
             f.write(code)
 
-        time.sleep(random(3, 7))
+        time.sleep(random.randint(3, 7))
 
     with submissions_path.open("w") as f:
         json.dump(list(submissions), f, indent=1)
