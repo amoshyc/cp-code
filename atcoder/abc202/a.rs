@@ -1,35 +1,9 @@
 #![allow(unused)]
 
 fn main() {
-    let n = read::<usize>();
-    let mut l = vec![0; n];
-    let mut r = vec![0; n];
-    let mut target_y = 0;
-    for i in 0..n {
-        let inp = readv::<i64>();
-        l[i] = inp[0];
-        r[i] = inp[1];
-    }
-
-    let sum_l = l.iter().sum::<i64>();
-    let sum_r = r.iter().sum::<i64>();
-    if target_y < sum_l || target_y > sum_r {
-        println!("No");
-        return;
-    }
-
-    let mut y = l.clone();
-    target_y -= sum_l;
-    for i in 0..n {
-        if target_y > 0 {
-            let x = target_y.min(r[i] - l[i]);
-            y[i] += x;
-            target_y -= x;
-        }
-    }
-
-    println!("Yes");
-    println!("{}", join(&y, " "));
+    let inp = readv::<usize>();
+    let (a, b, c) = (inp[0], inp[1], inp[2]);
+    println!("{}", 21 - a - b - c);
 }
 
 fn read<T: std::str::FromStr>() -> T {

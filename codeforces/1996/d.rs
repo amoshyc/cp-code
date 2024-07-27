@@ -1,35 +1,24 @@
 #![allow(unused)]
 
-fn main() {
-    let n = read::<usize>();
-    let mut l = vec![0; n];
-    let mut r = vec![0; n];
-    let mut target_y = 0;
-    for i in 0..n {
-        let inp = readv::<i64>();
-        l[i] = inp[0];
-        r[i] = inp[1];
-    }
-
-    let sum_l = l.iter().sum::<i64>();
-    let sum_r = r.iter().sum::<i64>();
-    if target_y < sum_l || target_y > sum_r {
-        println!("No");
-        return;
-    }
-
-    let mut y = l.clone();
-    target_y -= sum_l;
-    for i in 0..n {
-        if target_y > 0 {
-            let x = target_y.min(r[i] - l[i]);
-            y[i] += x;
-            target_y -= x;
+fn solve() {
+    let inp = readv::<i64>();
+    let (n, x) = (inp[0], inp[1]);
+    let mut ans = 0i64;
+    for a in (1..).take_while(|a| a * 1 + a * 1 + 1 <= n && a + 1 + 1 <= x) {
+        for b in (1..).take_while(|b| a * b + a * 1 + b * 1 <= n && a + b + 1 <= x) {
+            let c1 = (n - a * b) / (a + b);
+            let c2 = x - a - b;
+            ans += c1.min(c2);
         }
     }
+    println!("{}", ans);
+}
 
-    println!("Yes");
-    println!("{}", join(&y, " "));
+fn main() {
+    let tc = read::<usize>();
+    for _ in 0..tc {
+        solve();
+    }
 }
 
 fn read<T: std::str::FromStr>() -> T {
