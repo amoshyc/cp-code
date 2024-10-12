@@ -17,10 +17,11 @@ fn main() {
         mask[m - 1 - i] = 1;
     }
 
-    for subset in combinations(&edges, n - 1) {
+    for comb in comb_iter(m, n - 1) {
         let mut dsu = DSU::new(n);
         let mut val = 0;
-        for &(u, v, w) in subset.iter() {
+        for idx in comb.iter() {
+            let (u, v, w) = edges[*idx];
             if !dsu.same(u, v) {
                 dsu.unite(u, v);
                 val = (val + w) % k;
@@ -41,23 +42,20 @@ fn main() {
     println!("{}", ans);
 }
 
-// Modified from https://docs.python.org/3/library/itertools.html#itertools.combinations
-fn combinations<T: Copy>(arr: &[T], r: usize) -> impl std::iter::Iterator<Item = Vec<T>> + '_ {
-    assert!(r <= arr.len());
-    let n = arr.len();
-    let mut indices = (0..r).collect::<Vec<usize>>();
-    let iter1 = std::iter::once(indices.iter().map(|&i| arr[i]).collect::<Vec<T>>());
-    let iter2 = std::iter::from_fn(move || {
-        while let Some(i) = (0..r).rposition(|j| indices[j] != j + n - r) {
-            indices[i] += 1;
-            for j in (i + 1)..r {
-                indices[j] = indices[j - 1] + 1
-            }
-            let comb = indices.iter().map(|&i| arr[i]).collect::<Vec<T>>();
-            return Some(comb);
-        }
-        None
-    });
+fn next_comb(comb: &mut Vec<usize>, n: usize, r: usize) -> Option<()> {
+    let i = (0..r).rposition(|j| comb[j] != j + n - r)?;
+    comb[i] += 1;
+    for j in (i + 1)..r {
+        comb[j] = comb[j - 1] + 1;
+    }
+    Some(())
+}
+
+fn comb_iter(n: usize, r: usize) -> impl std::iter::Iterator<Item = Vec<usize>> {
+    let mut comb: Vec<usize> = (0..r).collect();
+    let iter1 = std::iter::once(comb.clone());
+    let iter2 =
+        std::iter::from_fn(move || next_comb(&mut comb, n, r).and_then(|_| Some(comb.clone())));
     iter1.chain(iter2)
 }
 
