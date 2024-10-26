@@ -22,12 +22,12 @@ fn main() {
 
 fn build<T>(arr: &[T]) -> Vec<T>
 where
-    T: Copy + std::ops::Add<Output = T>,
+    T: Default + Copy + std::ops::Add<Output = T>,
 {
-    let mut pref = vec![];
-    pref.push(arr[0]);
+    let mut pref = vec![T::default(); arr.len()];
+    pref[0] = arr[0];
     for i in 1..arr.len() {
-        pref.push(pref[i - 1] + arr[i]);
+        pref[i] = pref[i - 1] + arr[i];
     }
     pref
 }
@@ -38,13 +38,12 @@ where
     T: Default + Copy + std::ops::Sub<Output = T>,
 {
     if i == j {
-        return T::default();
+        T::default()
+    } else if i == 0 {
+        pref[j - 1]
+    } else {
+        pref[j - 1] - pref[i - 1]
     }
-    let mut res = pref[j - 1];
-    if i > 0 {
-        res = res - pref[i - 1];
-    }
-    res
 }
 
 fn read<T: std::str::FromStr>() -> T {

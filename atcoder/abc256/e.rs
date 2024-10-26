@@ -1,95 +1,83 @@
 #![allow(unused)]
 
-use std::collections::VecDeque;
-
 fn main() {
     let n = read::<usize>();
     let arr_x = mapv(&readv::<usize>(), |x| *x - 1);
     let arr_c = readv::<i64>();
 
-    let mut adj = vec![vec![]; n];
-    for u in 0..n {
-        let v = arr_x[u];
-        adj[u].push(v);
-    }
-
-    let (num_scc, belong) = tarjan_scc(&adj);
-    let mut scc = vec![vec![]; num_scc];
-    for u in 0..n {
-        scc[belong[u]].push(u);
-    }
-
     let mut ans = 0;
-    let mut vis = vec![false; n];
-    for i in 0..num_scc {
-        if scc[i].len() >= 2 || (scc[i].len() == 1 && adj[scc[i][0]][0] == scc[i][0]) {
-            // scc[i] is a cycle
-            ans += scc[i].iter().map(|u| arr_c[*u]).min().unwrap();
-        }
+    for cycle in find_cycles_in_functional_graph(&arr_x) {
+        ans += cycle.iter().map(|u| arr_c[*u]).min().unwrap();
     }
 
     println!("{}", ans);
 }
 
-struct TarjanSCC {
-    order: usize,
-    index: Vec<usize>,
-    lowlink: Vec<usize>,
-    onstack: Vec<bool>,
-    stack: Vec<usize>,
-    scc_id: usize,
-    belong: Vec<usize>,
-}
-
-// https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
-// Returns:
-//    num_scc: number of scc
-//    belong: which scc each vertex belongs to
-// The order of scc is a *reversed* topological sort of the DAG.
-fn tarjan_scc(adj: &Vec<Vec<usize>>) -> (usize, Vec<usize>) {
-    let n = adj.len();
-    let mut data = TarjanSCC {
-        order: 0,
-        index: vec![!0; n],
-        lowlink: vec![0; n],
-        onstack: vec![false; n],
-        stack: vec![],
-        scc_id: 0,
-        belong: vec![!0; n],
-    };
-    for root in 0..data.index.len() {
-        if data.index[root] == !0 {
-            tarjan_dfs(root, &mut data, adj);
-        }
-    }
-    (data.scc_id, data.belong)
-}
-
-fn tarjan_dfs(u: usize, data: &mut TarjanSCC, adj: &Vec<Vec<usize>>) {
-    data.index[u] = data.order;
-    data.lowlink[u] = data.order;
-    data.order += 1;
-    data.stack.push(u);
-    data.onstack[u] = true;
-
-    for &v in adj[u].iter() {
-        if data.index[v] == !0 {
-            tarjan_dfs(v, data, adj);
-            data.lowlink[u] = data.lowlink[u].min(data.lowlink[v]);
-        } else if data.onstack[v] {
-            data.lowlink[u] = data.lowlink[u].min(data.index[v]);
-        }
-    }
-
-    if data.lowlink[u] == data.index[u] {
-        while let Some(x) = data.stack.pop() {
-            data.onstack[x] = false;
-            data.belong[x] = data.scc_id;
-            if x == u {
-                break;
+fn find_cycles_in_functional_graph(nxt: &Vec<usize>) -> Vec<Vec<usize>> {
+    let n = nxt.len();
+    let mut dsu = DSU::new(n);
+    let mut cycles = vec![];
+    for u in 0..n {
+        if !dsu.same(u, nxt[u]) {
+            dsu.unite(u, nxt[u]);
+        } else {
+            // (u, nxt[u]) is the last edge of the cycle
+            let mut cycle = vec![u];
+            let mut x = nxt[u];
+            while x != u {
+                cycle.push(x);
+                x = nxt[x];
             }
+            cycles.push(cycle);
         }
-        data.scc_id += 1;
+    }
+    cycles
+}
+
+struct DSU {
+    par: Vec<usize>,
+    siz: Vec<usize>,
+}
+
+impl DSU {
+    fn new(n: usize) -> Self {
+        Self {
+            par: (0..n).collect(),
+            siz: vec![1; n],
+        }
+    }
+
+    fn root(&mut self, u: usize) -> usize {
+        if self.par[u] == u {
+            u
+        } else {
+            self.par[u] = self.root(self.par[u]);
+            self.par[u]
+        }
+    }
+
+    fn unite(&mut self, mut u: usize, mut v: usize) {
+        u = self.root(u);
+        v = self.root(v);
+        if u == v {
+            return;
+        }
+        if self.siz[u] > self.siz[v] {
+            self.par[v] = u;
+            self.siz[u] += self.siz[v];
+        } else {
+            self.par[u] = v;
+            self.siz[v] += self.siz[u];
+        }
+    }
+
+    fn same(&mut self, u: usize, v: usize) -> bool {
+        self.root(u) == self.root(v)
+    }
+
+    fn size(&mut self, u: usize) -> usize {
+        let r = self.root(u);
+        self.siz[r]
     }
 }
 

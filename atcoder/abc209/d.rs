@@ -57,7 +57,7 @@ impl LCA {
         }
         assert!(dep.iter().all(|d| *d != inf));
 
-        let nn = n.next_power_of_two().trailing_zeros() as usize;
+        let nn = n.next_power_of_two().trailing_zeros().max(1) as usize;
         let mut dp = vec![vec![root; n]; nn]; // beyond root is root
         dp[0].clone_from_slice(&par);
         for i in 1..nn {

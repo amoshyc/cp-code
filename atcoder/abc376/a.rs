@@ -1,31 +1,18 @@
 #![allow(unused)]
 
 fn main() {
-    let n = read::<usize>();
+    let inp = readv::<usize>();
+    let (n, c) = (inp[0], inp[1]);
     let arr = readv::<usize>();
-    let nxt = mapv(&arr, |&x| x - 1);
-
-    let (prefix, cycle) = walk_on_functional_graph(&nxt, 0);
-    let ans = mapv(&cycle, |&x| x + 1);
-    println!("{}", ans.len());
-    println!("{}", join(&ans, " "));
-}
-
-fn walk_on_functional_graph(nxt: &Vec<usize>, src: usize) -> (Vec<usize>, Vec<usize>) {
-    let mut idx = vec![!0; nxt.len()];
-
-    idx[src] = 0;
-    let mut path = vec![src];
-    let mut u = nxt[src];
-    while idx[u] == !0 {
-        idx[u] = path.len();
-        path.push(u);
-        u = nxt[u];
+    let mut ans = 1;
+    let mut last = arr[0];
+    for i in 1..n {
+        if arr[i] - last >= c {
+            ans += 1;
+            last = arr[i];
+        }
     }
-
-    let prefix = path[..idx[u]].to_vec(); // will be empty in permutation graph
-    let cycle = path[idx[u]..].to_vec();
-    (prefix, cycle)
+    println!("{}", ans);
 }
 
 fn read<T: std::str::FromStr>() -> T {

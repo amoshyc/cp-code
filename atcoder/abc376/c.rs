@@ -1,31 +1,39 @@
 #![allow(unused)]
 
+use std::collections::BTreeSet;
+
 fn main() {
     let n = read::<usize>();
-    let arr = readv::<usize>();
-    let nxt = mapv(&arr, |&x| x - 1);
+    let mut arr_a = readv::<i64>();
+    let arr_b = readv::<i64>();
 
-    let (prefix, cycle) = walk_on_functional_graph(&nxt, 0);
-    let ans = mapv(&cycle, |&x| x + 1);
-    println!("{}", ans.len());
-    println!("{}", join(&ans, " "));
-}
-
-fn walk_on_functional_graph(nxt: &Vec<usize>, src: usize) -> (Vec<usize>, Vec<usize>) {
-    let mut idx = vec![!0; nxt.len()];
-
-    idx[src] = 0;
-    let mut path = vec![src];
-    let mut u = nxt[src];
-    while idx[u] == !0 {
-        idx[u] = path.len();
-        path.push(u);
-        u = nxt[u];
+    let mut set_b = BTreeSet::new();
+    for i in 0..(n - 1) {
+        set_b.insert((arr_b[i], i));
     }
 
-    let prefix = path[..idx[u]].to_vec(); // will be empty in permutation graph
-    let cycle = path[idx[u]..].to_vec();
-    (prefix, cycle)
+    let mut f = vec![false; n];
+    arr_a.sort();
+    arr_a.reverse();
+    for i in 0..n {
+        if let Some(&(b, j)) = set_b.range((arr_a[i], 0)..).next() {
+            f[i] = true;
+            set_b.remove(&(b, j));
+        }
+    }
+
+    let cnt = f.iter().filter(|f| !**f).count();
+    if cnt >= 2 {
+        println!("-1");
+        return;
+    }
+
+    for i in 0..n {
+        if !f[i] {
+            println!("{}", arr_a[i]);
+            return;
+        }
+    }
 }
 
 fn read<T: std::str::FromStr>() -> T {

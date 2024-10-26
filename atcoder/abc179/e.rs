@@ -4,24 +4,14 @@ fn main() {
     let inp = readv::<usize>();
     let (n, r, m) = (inp[0], inp[1], inp[2]);
 
-    let f = |x: usize| (x * x % m);
-
-    let mut vis = vec![!0; m];
-    let mut path = vec![];
-    vis[r] = 0;
-    path.push(r);
-
-    let mut x = f(r);
-    while vis[x] == !0 {
-        vis[x] = path.len();
-        path.push(x);
-        x = f(x);
+    let mut nxt = vec![0; m];
+    for x in 0..m {
+        nxt[x] = x * x % m;
     }
-    let cycle = path[vis[x]..].to_vec();
-    let prefix = path[..vis[x]].to_vec();
 
-    let cycle = mapv(&cycle, |&x| x as i64);
+    let (prefix, cycle) = walk_on_functional_graph(&nxt, r);
     let prefix = mapv(&prefix, |&x| x as i64);
+    let cycle = mapv(&cycle, |&x| x as i64);
     if n <= prefix.len() {
         println!("{}", prefix[..n].iter().sum::<i64>());
     } else {
@@ -33,6 +23,23 @@ fn main() {
         ans += cycle[..remaining].iter().sum::<i64>();
         println!("{}", ans);
     }
+}
+
+fn walk_on_functional_graph(nxt: &Vec<usize>, src: usize) -> (Vec<usize>, Vec<usize>) {
+    let mut idx = vec![!0; nxt.len()];
+
+    idx[src] = 0;
+    let mut path = vec![src];
+    let mut u = nxt[src];
+    while idx[u] == !0 {
+        idx[u] = path.len();
+        path.push(u);
+        u = nxt[u];
+    }
+
+    let prefix = path[..idx[u]].to_vec(); // will be empty in permutation graph
+    let cycle = path[idx[u]..].to_vec();
+    (prefix, cycle)
 }
 
 fn read<T: std::str::FromStr>() -> T {

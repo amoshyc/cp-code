@@ -9,24 +9,19 @@ fn main() {
     }
 
     segs.sort();
-
     let mut ans = vec![];
-    let mut s = segs[0].0;
-    let mut t = segs[0].1;
     let mut i = 0;
     let mut j = 1;
     while i < n {
+        let mut t = segs[i].1;
         while j < n && segs[j].0 <= t {
             t = t.max(segs[j].1);
             j += 1;
         }
-        ans.push(format!("{} {}", s, t));
+        ans.push(format!("{} {}", segs[i].0, t));
         i = j;
-        if i < n {
-            s = segs[i].0;
-            t = segs[i].1;
-        }
     }
+
     println!("{}", join(&ans, "\n"));
 }
 
