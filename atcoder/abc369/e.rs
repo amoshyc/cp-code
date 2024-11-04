@@ -52,7 +52,7 @@ fn main() {
 
 fn floyd_warshall(adj: &Vec<Vec<i64>>, inf: i64) -> Vec<Vec<i64>> {
     // dp[k][u][v] = minimum distance from u to v using vertices 0..=k as intermediate
-    // dp[0][u][v] = adj[u][v]
+    // dp[-1][u][v] = adj[u][v]
     // dp[k][u][v] = min(dp[k - 1][u][v], dp[k - 1][u][k] + dp[k - 1][k][v]);
     let n = adj.len();
     let mut dp = adj.clone();

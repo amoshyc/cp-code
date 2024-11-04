@@ -1,55 +1,48 @@
 #![allow(unused)]
 
-use std::collections::VecDeque;
-
 fn main() {
     let n = read::<usize>();
-    let nxt = mapv(&readv::<usize>(), |&x| x - 1);
-
-    let mut rev = vec![vec![]; n];
-    for u in 0..n {
-        rev[nxt[u]].push(u);
+    let mut deg = vec![0; n];
+    let mut adj = vec![vec![]; n];
+    for _ in 0..(n - 1) {
+        let inp = readv::<usize>();
+        let (u, v) = (inp[0] - 1, inp[1] - 1);
+        deg[u] += 1;
+        deg[v] += 1;
+        adj[u].push(v);
+        adj[v].push(u);
     }
 
-    let mut cnt = vec![-1; n];
-    for cycle in find_cycles_in_functional_graph(&nxt) {
-        let mut que = VecDeque::new();
-        for &u in cycle.iter() {
-            cnt[u] = cycle.len() as i64;
-            que.push_back(u);
+    let mut dsu = DSU::new(n);
+    for u in 0..n {
+        for &v in adj[u].iter() {
+            if deg[u] == 3 && deg[v] == 3 {
+                dsu.unite(u, v);
+            }
         }
-        while let Some(u) = que.pop_front() {
-            for &v in rev[u].iter() {
-                if cnt[v] == -1 {
-                    cnt[v] = cnt[u] + 1;
-                    que.push_back(v);
+    }
+
+    let mut groups = vec![vec![]; n];
+    for u in 0..n {
+        if deg[u] == 2 {
+            for &v in adj[u].iter() {
+                if deg[v] == 3 {
+                    let r = dsu.root(v);
+                    groups[r].push(u);
                 }
             }
         }
     }
 
-    println!("{}", cnt.iter().sum::<i64>());
-}
-
-fn find_cycles_in_functional_graph(nxt: &Vec<usize>) -> Vec<Vec<usize>> {
-    let n = nxt.len();
-    let mut dsu = DSU::new(n);
-    let mut cycles = vec![];
-    for u in 0..n {
-        // (u, nxt[u]) is the last edge of the cycle
-        if dsu.same(u, nxt[u]) {
-            let mut cycle = vec![u];
-            let mut x = nxt[u];
-            while x != u {
-                cycle.push(x);
-                x = nxt[x];
-            }
-            cycles.push(cycle);
-        } else {
-            dsu.unite(u, nxt[u]);
+    let mut ans = 0;
+    for group in groups {
+        if group.len() >= 2 {
+            let g = group.len() as i64;
+            ans += g * (g - 1) / 2;
         }
     }
-    cycles
+
+    println!("{}", ans);
 }
 
 struct DSU {

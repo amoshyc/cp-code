@@ -1,55 +1,24 @@
 #![allow(unused)]
 
-use std::collections::VecDeque;
-
 fn main() {
     let n = read::<usize>();
-    let nxt = mapv(&readv::<usize>(), |&x| x - 1);
-
-    let mut rev = vec![vec![]; n];
-    for u in 0..n {
-        rev[nxt[u]].push(u);
+    let mut edges = vec![];
+    for _ in 0..(n - 1) {
+        let edge = readv::<i64>();
+        let u = edge[0] as usize - 1;
+        let v = edge[1] as usize - 1;
+        let w = edge[2];
+        edges.push((u, v, w));
     }
 
-    let mut cnt = vec![-1; n];
-    for cycle in find_cycles_in_functional_graph(&nxt) {
-        let mut que = VecDeque::new();
-        for &u in cycle.iter() {
-            cnt[u] = cycle.len() as i64;
-            que.push_back(u);
-        }
-        while let Some(u) = que.pop_front() {
-            for &v in rev[u].iter() {
-                if cnt[v] == -1 {
-                    cnt[v] = cnt[u] + 1;
-                    que.push_back(v);
-                }
-            }
-        }
-    }
-
-    println!("{}", cnt.iter().sum::<i64>());
-}
-
-fn find_cycles_in_functional_graph(nxt: &Vec<usize>) -> Vec<Vec<usize>> {
-    let n = nxt.len();
+    edges.sort_by_key(|&(u, v, w)| w);
     let mut dsu = DSU::new(n);
-    let mut cycles = vec![];
-    for u in 0..n {
-        // (u, nxt[u]) is the last edge of the cycle
-        if dsu.same(u, nxt[u]) {
-            let mut cycle = vec![u];
-            let mut x = nxt[u];
-            while x != u {
-                cycle.push(x);
-                x = nxt[x];
-            }
-            cycles.push(cycle);
-        } else {
-            dsu.unite(u, nxt[u]);
-        }
+    let mut ans = 0 as i64;
+    for (u, v, w) in edges {
+        ans += dsu.size(u) as i64 * dsu.size(v) as i64 * w;
+        dsu.unite(u, v);
     }
-    cycles
+    println!("{}", ans);
 }
 
 struct DSU {
@@ -112,16 +81,8 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
         .collect()
 }
 
-fn reads() -> Vec<char> {
-    read::<String>().chars().collect()
-}
-
-fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
-    arr.iter().map(f).collect()
-}
-
-fn join<T: ToString>(arr: &[T], sep: &str) -> String {
-    arr.iter()
+fn join<T: ToString>(v: &[T], sep: &str) -> String {
+    v.iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
         .join(sep)
