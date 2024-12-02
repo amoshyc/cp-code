@@ -8,21 +8,21 @@ fn main() {
         arr.push(reads());
     }
 
-    let mut sum = 0;
+    let mut ans = 0;
+    let mut vis = vec![vec![false; w]; h];
     for r in 0..h {
         for c in 0..w {
             if arr[r][c] == '.' {
-                let mut vis = vec![vec![false; w]; h];
                 let mut cnt = 0;
                 vis[r][c] = true;
-
                 dfs(r, c, k, &mut vis, &mut cnt, &arr);
-                sum += cnt;
+                vis[r][c] = false;
+                ans += cnt;
             }
         }
     }
 
-    println!("{}", sum);
+    println!("{}", ans);
 }
 
 fn dfs(
@@ -30,11 +30,11 @@ fn dfs(
     c: usize,
     k: usize,
     vis: &mut Vec<Vec<bool>>,
-    ans: &mut usize,
+    cnt: &mut usize,
     arr: &Vec<Vec<char>>,
 ) {
     if k == 0 {
-        *ans += 1;
+        *cnt += 1;
         return;
     }
 
@@ -45,7 +45,7 @@ fn dfs(
         let nc = c.checked_add_signed(dc).unwrap_or(!0);
         if nr < h && nc < w && arr[nr][nc] == '.' && !vis[nr][nc] {
             vis[nr][nc] = true;
-            dfs(nr, nc, k - 1, vis, ans, arr);
+            dfs(nr, nc, k - 1, vis, cnt, arr);
             vis[nr][nc] = false;
         }
     }
