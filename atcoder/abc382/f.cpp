@@ -69,58 +69,44 @@ struct LazySegTree {
     }
 };
 
-const uint64_t M = 998'244'353;
-
-using S = uint64_t;
-using F = pair<uint64_t, uint64_t>;
-constexpr S default_data = 0;
-constexpr F default_lazy = {1, 0};
-
-S op(S a, S b) { return (a + b) % M; }
-
-S apply_lazy(F lazy, S data, int l, int r) {
-    auto [b, c] = lazy;
-    auto res = b * data % M;
-    res += c * uint64_t(r - l);
-    return res % M;
-}
-F merge_lazy(F parent, F child) {
-    auto [b1, c1] = parent;
-    auto [b2, c2] = child;
-    auto b = b1 * b2 % M;
-    auto c = (b1 * c2 % M + c1) % M;
-    return {b, c};
-}
-using SegTree =
-    LazySegTree<S, F, default_data, default_lazy, op, apply_lazy, merge_lazy>;
-
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n, q;
-    cin >> n >> q;
-    vector<uint64_t> arr(n);
-    for (auto &x : arr) {
-        cin >> x;
+    int h, w, n;
+    cin >> h >> w >> n;
+    vector<tuple<int, int, int, int>> bars;
+    for (int i = 0; i < n; i++) {
+        int r, c, l;
+        cin >> r >> c >> l;
+        r--;
+        c--;
+        bars.push_back({r, c, l, i});
+    }
+    sort(bars.begin(), bars.end());
+    reverse(bars.begin(), bars.end());
+
+    vector<int> ans(n, 0);
+    vector<int> arr(w, h);
+
+    using S = int;
+    using F = int;
+    constexpr S default_data = 1'000'000;
+    constexpr F default_lazy = 1'000'000;
+    auto op = [](S a, S b) -> S { return min(a, b); };
+    auto apply_lazy = [](F lazy, S, int, int) -> S { return lazy; };
+    auto merge_lazy = [](F parent, F) -> F { return parent; };
+    auto seg = LazySegTree<S, F, default_data, default_lazy, op, apply_lazy,
+                           merge_lazy>(arr);
+
+    for (auto [r, c, l, i] : bars) {
+        int bottom = seg.query(c, c + l, 0, 0, seg.nn);
+        ans[i] = bottom - 1;
+        seg.modify(c, c + l, ans[i], 0, 0, seg.nn);
     }
 
-    SegTree seg(arr);
-
-    vector<int> ans;
-    while (q--) {
-        int cmd;
-        cin >> cmd;
-        if (cmd == 0) {
-            int l, r;
-            uint64_t b, c;
-            cin >> l >> r >> b >> c;
-            seg.modify(l, r, {b, c}, 0, 0, seg.nn);
-        } else {
-            int l, r;
-            cin >> l >> r;
-            cout << seg.query(l, r, 0, 0, seg.nn) << "\n";
-        }
+    for (auto &x : ans) {
+        cout << x + 1 << "\n";
     }
 
     return 0;
