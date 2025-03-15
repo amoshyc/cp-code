@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 fn main() {
-    let m = 500_005;
+    let m = 500_000 + 5;
     let arr = (0..m).collect();
     let mut seg = SegTree::<Node>::from_vec(&arr);
 
@@ -9,8 +9,8 @@ fn main() {
     for _ in 0..n {
         let lr = readv::<usize>();
         let (l, r) = (lr[0], lr[1]);
-        let i = seg.find_first_of(&|x| x >= l, 0, m, 0, 0, seg.nn);
-        let j = seg.find_first_of(&|x| x > r, 0, m, 0, 0, seg.nn);
+        let i = seg.first_of(&|data, pref, suff| data >= l, 0, 0, 0, 0, seg.nn);
+        let j = seg.first_of(&|data, pref, suff| data > r, 0, 0, 0, 0, seg.nn);
         if let Some((i, j)) = i.zip(j) {
             seg.modify(i, j, 1, 0, 0, seg.nn);
         }
@@ -127,37 +127,58 @@ impl<T: SegTrait> SegTree<T> {
         self.data[u] = T::op(self.data[lch].clone(), self.data[rch].clone());
     }
 
-    fn find_first_of<P: Fn(T::S) -> bool>(
+    fn show(&mut self, dep: usize, u: usize, l: usize, r: usize) {
+        if u >= 2 * self.nn - 1 {
+            return;
+        }
+        println!("{}{:?}", " ".repeat(dep * 3), self.data[u]);
+        self.push(u, l, r);
+        self.show(dep + 1, 2 * u + 1, l, (l + r) / 2);
+        self.show(dep + 1, 2 * u + 2, (l + r) / 2, r);
+    }
+
+    // 0 0 0 1 1 1
+    //       ^
+    fn first_of<P: Fn(T::S, T::S, T::S) -> bool>(
         &mut self,
-        f: &P,
-        a: usize,
-        b: usize,
+        ok: &P,
+        pref: T::S,
+        suff: T::S,
         u: usize,
         l: usize,
         r: usize,
     ) -> Option<usize> {
-        if l >= b || r <= a || !f(self.data[u].clone()) {
+        if !ok(
+            self.data[u].clone(),
+            T::op(pref.clone(), self.data[u].clone()),
+            T::op(suff.clone(), self.data[u].clone()),
+        ) {
             return None;
         }
         if r - l == 1 {
             return Some(l);
         }
-        let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
         self.push(u, l, r);
-        if let Some(idx) = self.find_first_of(f, a, b, lch, l, m) {
+        let (m, lch, rch) = ((l + r) / 2, 2 * u + 1, 2 * u + 2);
+        // pivot at left
+        let new_pref = T::op(T::default_data(), pref.clone());
+        let new_suff = T::op(suff.clone(), self.data[rch].clone());
+        if let Some(idx) = self.first_of(ok, new_pref, new_suff, lch, l, m) {
             return Some(idx);
         }
-        if let Some(idx) = self.find_first_of(f, a, b, rch, m, r) {
+        // pivot at right
+        let new_pref = T::op(self.data[lch].clone(), pref.clone());
+        let new_suff = T::op(suff.clone(), T::default_data());
+        if let Some(idx) = self.first_of(ok, new_pref, new_suff, rch, m, r) {
             return Some(idx);
         }
         None
     }
 }
 
-
 fn read<T: std::str::FromStr>() -> T {
     let mut s = String::new();
-    std::io::stdin().read_line(&mut s).ok();
+    std::io::stdin().read_line(&mut s);
     s.trim().parse().ok().unwrap()
 }
 

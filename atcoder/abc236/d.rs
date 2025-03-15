@@ -2,58 +2,37 @@
 
 fn main() {
     let n = read::<usize>();
-    let mut aff = vec![vec![0; 2 * n]; 2 * n];
 
-    for r in 0..(2 * n - 1) {
-        let inp = readv::<u64>();
-        for c in 0..inp.len() {
-            aff[r][r + 1 + c] = inp[c];
-            aff[r + 1 + c][r] = inp[c];
+    let mut scores = vec![vec![0; 2 * n]; 2 * n];
+    for i in 0..(2 * n - 1) {
+        let arr = readv::<usize>();
+        for j in 0..arr.len() {
+            scores[i][i + 1 + j] = arr[j];
+            scores[i + 1 + j][i] = arr[j];
         }
     }
 
-    let mut dfs = DFS {
-        ans: 0,
-        seq: vec![!0; 2 * n],
-        aff,
-    };
-    dfs.run(0, 0);
-
-    println!("{}", dfs.ans);
+    let mut ans = 0;
+    let mut used = vec![false; 2 * n];
+    dfs(0, &mut used, &mut ans, &scores);
+    println!("{}", ans);
 }
 
-struct DFS {
-    ans: u64,
-    seq: Vec<usize>,
-    aff: Vec<Vec<u64>>,
-}
+fn dfs(val: usize, used: &mut Vec<bool>, ans: &mut usize, scores: &Vec<Vec<usize>>) {
+    let avail: Vec<usize> = (0..used.len()).filter(|&i| !used[i]).collect();
 
-impl DFS {
-    fn run(&mut self, i: usize, mask: usize) {
-        if i == self.aff.len() {
-            let mut xor = 0;
-            for i in (1..self.seq.len()).step_by(2) {
-                xor = xor ^ self.aff[self.seq[i - 1]][self.seq[i]];
-            }
-            self.ans = self.ans.max(xor);
-            return;
-        }
+    if avail.len() == 0 {
+        *ans = (*ans).max(val);
+        return;
+    }
 
-        let m = self.aff.len();
-        if i % 2 == 0 {
-            let j = (0..m).filter(|&j| (mask >> j) & 1 == 0).next().unwrap();
-            self.seq[i] = j;
-            self.run(i + 1, mask | (1 << j));
-            self.seq[i] = !0;
-        } else {
-            for j in 0..m {
-                if (mask >> j) & 1 == 0 {
-                    self.seq[i] = j;
-                    self.run(i + 1, mask | (1 << j));
-                    self.seq[i] = !0;
-                }
-            }
-        }
+    let x = avail[0];
+    for &y in avail.iter().skip(1) {
+        used[x] = true;
+        used[y] = true;
+        dfs(val ^ scores[x][y], used, ans, scores);
+        used[y] = false;
+        used[x] = false;
     }
 }
 
@@ -71,7 +50,11 @@ fn readv<T: std::str::FromStr>() -> Vec<T> {
 }
 
 fn reads() -> Vec<char> {
-    read::<String>().chars().collect::<Vec<char>>()
+    read::<String>().chars().collect()
+}
+
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
 }
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {
