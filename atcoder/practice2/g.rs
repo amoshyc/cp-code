@@ -1,12 +1,19 @@
 #![allow(unused)]
 
+use std::collections::BTreeSet;
+
+use proconio::input;
+use proconio::marker::*;
+
 fn main() {
-    let inp = readv::<usize>();
-    let (n, m) = (inp[0], inp[1]);
+    input! {
+        n: usize,
+        m: usize,
+        edges: [(usize, usize); m],
+    }
+
     let mut adj = vec![vec![]; n];
-    for _ in 0..m {
-        let edge = readv::<usize>();
-        let (u, v) = (edge[0], edge[1]);
+    for &(u, v) in &edges {
         adj[u].push(v);
     }
 
@@ -33,6 +40,36 @@ struct TarjanSCC {
     belong: Vec<usize>,
 }
 
+impl TarjanSCC {
+    fn dfs(&mut self, u: usize, adj: &Vec<Vec<usize>>) {
+        self.index[u] = self.order;
+        self.lowlink[u] = self.order;
+        self.order += 1;
+        self.stack.push(u);
+        self.onstack[u] = true;
+
+        for &v in &adj[u] {
+            if self.index[v] == !0 {
+                self.dfs(v, adj);
+                self.lowlink[u] = self.lowlink[u].min(self.lowlink[v]);
+            } else if self.onstack[v] {
+                self.lowlink[u] = self.lowlink[u].min(self.index[v]);
+            }
+        }
+
+        if self.lowlink[u] == self.index[u] {
+            while let Some(x) = self.stack.pop() {
+                self.onstack[x] = false;
+                self.belong[x] = self.scc_id;
+                if x == u {
+                    break;
+                }
+            }
+            self.scc_id += 1;
+        }
+    }
+}
+
 // https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
 // Returns:
 //    num_scc: number of scc
@@ -49,62 +86,14 @@ fn tarjan_scc(adj: &Vec<Vec<usize>>) -> (usize, Vec<usize>) {
         scc_id: 0,
         belong: vec![!0; n],
     };
-    for root in 0..data.index.len() {
+    for root in 0..n {
         if data.index[root] == !0 {
-            tarjan_dfs(root, &mut data, adj);
+            data.dfs(root, adj);
         }
     }
     (data.scc_id, data.belong)
 }
 
-fn tarjan_dfs(u: usize, data: &mut TarjanSCC, adj: &Vec<Vec<usize>>) {
-    data.index[u] = data.order;
-    data.lowlink[u] = data.order;
-    data.order += 1;
-    data.stack.push(u);
-    data.onstack[u] = true;
-
-    for &v in adj[u].iter() {
-        if data.index[v] == !0 {
-            tarjan_dfs(v, data, adj);
-            data.lowlink[u] = data.lowlink[u].min(data.lowlink[v]);
-        } else if data.onstack[v] {
-            data.lowlink[u] = data.lowlink[u].min(data.index[v]);
-        }
-    }
-
-    if data.lowlink[u] == data.index[u] {
-        while let Some(x) = data.stack.pop() {
-            data.onstack[x] = false;
-            data.belong[x] = data.scc_id;
-            if x == u {
-                break;
-            }
-        }
-        data.scc_id += 1;
-    }
-}
-
-fn read<T: std::str::FromStr>() -> T {
-    let mut s = String::new();
-    std::io::stdin().read_line(&mut s).ok();
-    s.trim().parse().ok().unwrap()
-}
-
-fn readv<T: std::str::FromStr>() -> Vec<T> {
-    read::<String>()
-        .split_ascii_whitespace()
-        .map(|t| t.parse().ok().unwrap())
-        .collect()
-}
-
-fn reads() -> Vec<char> {
-    read::<String>().chars().collect::<_>()
-}
-
-fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
-    arr.iter().map(f).collect()
-}
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {
     arr.iter()

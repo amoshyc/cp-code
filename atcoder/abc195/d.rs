@@ -1,69 +1,54 @@
 #![allow(unused)]
 
-use std::{cmp::Reverse, collections::BTreeSet};
+use proconio::input;
+use proconio::marker::Usize1;
+use std::cmp::Reverse;
+use std::collections::BTreeSet;
 
 fn main() {
-    let inp = readv::<usize>();
-    let (n, m, q) = (inp[0], inp[1], inp[2]);
-
-    let mut items = vec![];
-    for _ in 0..n {
-        let inp = readv::<i64>();
-        let (w, v) = (inp[0], inp[1]);
-        items.push((w, v));
+    input! {
+        n: usize,
+        m: usize,
+        q: usize,
+        items: [(i64, i64); n],
+        boxes: [i64; m],
+        asks: [(Usize1, Usize1); q],
     }
-    items.sort_by_key(|&(w, v)| (Reverse(v), w));
-
-    let all_boxes = readv::<i64>();
 
     let mut ans = vec![];
-    for _ in 0..q {
-        let inp = readv::<usize>();
-        let (l, r) = (inp[0] - 1, inp[1] - 1);
-
-        let mut total = 0;
-        let mut boxes = BTreeSet::new();
-        for i in 0..m {
-            if i < l || i > r {
-                boxes.insert((all_boxes[i], i));
-            }
-        }
-        for &(w, v) in items.iter() {
-            if let Some(&(x, i)) = boxes.range((w, 0)..).next() {
-                total += v;
-                boxes.remove(&(x, i));
-            }
-        }
-
-        ans.push(total);
+    for &(l, r) in &asks {
+        let subset = (0..m)
+            .filter(|&i| i < l || i > r)
+            .map(|i| boxes[i])
+            .collect();
+        ans.push(greedy_packing_01(items.clone(), subset));
     }
 
     println!("{}", join(&ans, "\n"));
 }
 
-fn read<T: std::str::FromStr>() -> T {
-    let mut s = String::new();
-    std::io::stdin().read_line(&mut s).ok();
-    s.trim().parse().ok().unwrap()
+//             Sorted Boxes
+//               A B C D
+// item 0 (v0):      1 1
+// item 1 (v1):    1 1 1
+// item 2 (v2):        1
+// item 3 (v3):  1 1 1 1
+// Each row (item) is a 0...1 distribution.
+fn greedy_packing_01(mut items: Vec<(i64, i64)>, boxes: Vec<i64>) -> i64 {
+    let mut boxes = BTreeSet::from_iter((0..boxes.len()).map(|i| (boxes[i], i)));
+    items.sort_by_key(|&(w, v)| (Reverse(v), w));
+    let mut ans = 0;
+    for &(w, v) in &items {
+        if let Some(&(b, i)) = boxes.range((w, 0)..).next() {
+            boxes.remove(&(b, i));
+            ans += v;
+        }
+    }
+    ans
 }
 
-fn readv<T: std::str::FromStr>() -> Vec<T> {
-    read::<String>()
-        .split_ascii_whitespace()
-        .map(|t| t.parse().ok().unwrap())
-        .collect()
-}
-
-fn reads() -> Vec<char> {
-    read::<String>().chars().collect::<Vec<char>>()
-}
-
-fn mapv<T, S>(arr: &Vec<T>, f: fn(&T) -> S) -> Vec<S> {
-    arr.iter().map(f).collect()
-}
-
-fn join<T: ToString>(v: &[T], sep: &str) -> String {
-    v.iter()
+fn join<T: ToString>(arr: &[T], sep: &str) -> String {
+    arr.iter()
         .map(|x| x.to_string())
         .collect::<Vec<String>>()
         .join(sep)

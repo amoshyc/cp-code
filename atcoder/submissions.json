@@ -1,5 +1,11 @@
 [
  [
+  "abc061",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc061/submissions/68732267"
+ ],
+ [
   "abc125",
   "a",
   "rs",
@@ -16,6 +22,12 @@
   "c",
   "rs",
   "https://atcoder.jp/contests/abc125/submissions/62121555"
+ ],
+ [
+  "abc125",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc125/submissions/68808551"
  ],
  [
   "abc126",
@@ -198,10 +210,94 @@
   "https://atcoder.jp/contests/abc133/submissions/6289812"
  ],
  [
+  "abc134",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc134/submissions/68303803"
+ ],
+ [
+  "abc134",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc134/submissions/68303867"
+ ],
+ [
+  "abc134",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc134/submissions/68303938"
+ ],
+ [
+  "abc135",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc135/submissions/68808108"
+ ],
+ [
+  "abc135",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc135/submissions/68808230"
+ ],
+ [
+  "abc135",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc135/submissions/68807848"
+ ],
+ [
   "abc135",
   "d",
   "py",
   "https://atcoder.jp/contests/abc135/submissions/18841269"
+ ],
+ [
+  "abc136",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc136/submissions/68807108"
+ ],
+ [
+  "abc136",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc136/submissions/68807136"
+ ],
+ [
+  "abc136",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc136/submissions/68807242"
+ ],
+ [
+  "abc136",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc136/submissions/68807380"
+ ],
+ [
+  "abc137",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc137/submissions/68182370"
+ ],
+ [
+  "abc137",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc137/submissions/68182402"
+ ],
+ [
+  "abc137",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc137/submissions/68182624"
+ ],
+ [
+  "abc137",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc137/submissions/68200006"
  ],
  [
   "abc138",
@@ -1989,7 +2085,7 @@
   "abc195",
   "d",
   "rs",
-  "https://atcoder.jp/contests/abc195/submissions/43511869"
+  "https://atcoder.jp/contests/abc195/submissions/68199969"
  ],
  [
   "abc195",
@@ -2440,6 +2536,12 @@
   "d",
   "rs",
   "https://atcoder.jp/contests/abc214/submissions/59233624"
+ ],
+ [
+  "abc214",
+  "e",
+  "rs",
+  "https://atcoder.jp/contests/abc214/submissions/68201205"
  ],
  [
   "abc215",
@@ -4701,7 +4803,7 @@
   "abc284",
   "f",
   "rs",
-  "https://atcoder.jp/contests/abc284/submissions/50879999"
+  "https://atcoder.jp/contests/abc284/submissions/68729999"
  ],
  [
   "abc285",
@@ -5511,7 +5613,7 @@
   "abc308",
   "f",
   "rs",
-  "https://atcoder.jp/contests/abc308/submissions/43151845"
+  "https://atcoder.jp/contests/abc308/submissions/68200041"
  ],
  [
   "abc309",
@@ -6016,6 +6118,12 @@
   "c",
   "rs",
   "https://atcoder.jp/contests/abc325/submissions/46803102"
+ ],
+ [
+  "abc325",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc325/submissions/68201188"
  ],
  [
   "abc325",
@@ -6933,7 +7041,7 @@
   "abc353",
   "e",
   "rs",
-  "https://atcoder.jp/contests/abc353/submissions/53376843"
+  "https://atcoder.jp/contests/abc353/submissions/68730388"
  ],
  [
   "abc354",
@@ -8790,6 +8898,108 @@
   "https://atcoder.jp/contests/abc416/submissions/67977770"
  ],
  [
+  "abc417",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc417/submissions/68117572"
+ ],
+ [
+  "abc417",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc417/submissions/68120942"
+ ],
+ [
+  "abc417",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc417/submissions/68124385"
+ ],
+ [
+  "abc418",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc418/submissions/68381083"
+ ],
+ [
+  "abc418",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc418/submissions/68321335"
+ ],
+ [
+  "abc418",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc418/submissions/68381039"
+ ],
+ [
+  "abc418",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc418/submissions/68381154"
+ ],
+ [
+  "abc418",
+  "e",
+  "rs",
+  "https://atcoder.jp/contests/abc418/submissions/68381296"
+ ],
+ [
+  "abc419",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc419/submissions/68513697"
+ ],
+ [
+  "abc419",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc419/submissions/68520365"
+ ],
+ [
+  "abc419",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc419/submissions/68558969"
+ ],
+ [
+  "abc419",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc419/submissions/68560541"
+ ],
+ [
+  "abc420",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/abc420/submissions/68737071"
+ ],
+ [
+  "abc420",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/abc420/submissions/68744308"
+ ],
+ [
+  "abc420",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/abc420/submissions/68749288"
+ ],
+ [
+  "abc420",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/abc420/submissions/68786908"
+ ],
+ [
+  "abc420",
+  "e",
+  "rs",
+  "https://atcoder.jp/contests/abc420/submissions/68780128"
+ ],
+ [
   "abl",
   "a",
   "py",
@@ -9081,7 +9291,7 @@
   "dp",
   "a",
   "rs",
-  "https://atcoder.jp/contests/dp/submissions/41125539"
+  "https://atcoder.jp/contests/dp/submissions/68726729"
  ],
  [
   "dp",
@@ -9093,7 +9303,7 @@
   "dp",
   "b",
   "rs",
-  "https://atcoder.jp/contests/dp/submissions/41125618"
+  "https://atcoder.jp/contests/dp/submissions/68726761"
  ],
  [
   "dp",
@@ -9105,7 +9315,7 @@
   "dp",
   "c",
   "rs",
-  "https://atcoder.jp/contests/dp/submissions/41125788"
+  "https://atcoder.jp/contests/dp/submissions/68726881"
  ],
  [
   "dp",
@@ -9117,7 +9327,7 @@
   "dp",
   "d",
   "rs",
-  "https://atcoder.jp/contests/dp/submissions/41125953"
+  "https://atcoder.jp/contests/dp/submissions/68727087"
  ],
  [
   "dp",
@@ -9129,7 +9339,7 @@
   "dp",
   "e",
   "rs",
-  "https://atcoder.jp/contests/dp/submissions/41143359"
+  "https://atcoder.jp/contests/dp/submissions/68790002"
  ],
  [
   "dp",
@@ -9459,7 +9669,7 @@
   "practice2",
   "g",
   "rs",
-  "https://atcoder.jp/contests/practice2/submissions/53308987"
+  "https://atcoder.jp/contests/practice2/submissions/68833087"
  ],
  [
   "practice2",
@@ -9652,5 +9862,29 @@
   "z",
   "rs",
   "https://atcoder.jp/contests/typical90/submissions/54069738"
+ ],
+ [
+  "zone2021",
+  "a",
+  "rs",
+  "https://atcoder.jp/contests/zone2021/submissions/68097153"
+ ],
+ [
+  "zone2021",
+  "b",
+  "rs",
+  "https://atcoder.jp/contests/zone2021/submissions/68097385"
+ ],
+ [
+  "zone2021",
+  "c",
+  "rs",
+  "https://atcoder.jp/contests/zone2021/submissions/68098847"
+ ],
+ [
+  "zone2021",
+  "d",
+  "rs",
+  "https://atcoder.jp/contests/zone2021/submissions/68099061"
  ]
 ]

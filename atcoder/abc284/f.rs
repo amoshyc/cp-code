@@ -1,16 +1,22 @@
 #![allow(unused)]
 
-fn main() {
-    let n = read::<usize>();
-    let t = reads();
+use proconio::input;
+use proconio::marker::Chars;
 
-    let tt = mapv(&t, |&c| c as u64);
-    let mut r = tt.clone();
+fn main() {
+    input! {
+        n: usize,
+        t: Chars,
+    }
+
+    let mut r = t.clone();
     r.reverse();
 
-    let hasher = PolyHasher::new(t.len(), 31, 1_000_000_007);
-    let ht = hasher.hash(&tt);
+    let hasher = PolyHasher2::new(t.len());
+    let ht = hasher.hash(&t);
     let hr = hasher.hash(&r);
+    // let ht = hasher.hash(&t.iter().map(|&c| c as u64).collect::<Vec<u64>>());
+    // let hr = hasher.hash(&r.iter().map(|&c| c as u64).collect::<Vec<u64>>());
 
     // T = S[..i] + rev(S) + S[i..]
     // =>
@@ -52,71 +58,79 @@ fn powmod(a: u64, mut b: u64, m: u64) -> u64 {
     res
 }
 
+fn foldv<T: Clone>(arr: &[T], op: impl Fn(T, T) -> T) -> Vec<T> {
+    let mut res = vec![arr[0].clone(); arr.len()];
+    for i in 1..arr.len() {
+        res[i] = op(res[i - 1].clone(), arr[i].clone());
+    }
+    res
+}
+
 struct PolyHasher {
-    prime: u64,
+    p: u64,
     powr: Vec<u64>,
     pinv: Vec<u64>,
 }
 
 impl PolyHasher {
-    fn new(n: usize, base: u64, prime: u64) -> PolyHasher {
-        let mut powr = vec![1; n];
-        let mut pinv = vec![1; n];
-        for i in 1..n {
-            powr[i] = powr[i - 1] * base % prime;
-        }
-        pinv[n - 1] = powmod(powr[n - 1], prime - 2, prime);
-        for i in (0..(n - 1)).rev() {
-            pinv[i] = pinv[i + 1] * base % prime;
-        }
-        PolyHasher { prime, powr, pinv }
+    fn new(n: usize, b: u64, p: u64) -> Self {
+        let powr = foldv(&vec![1; n], |acc, _| (acc * b) % p);
+        let inv = powmod(powr[n - 1], p - 2, p);
+        let pinv = foldv(&vec![inv; n], |acc, _| (acc * b) % p);
+        let pinv = pinv.into_iter().rev().collect();
+        Self { p, powr, pinv }
     }
 
-    fn hash(&self, arr: &[u64]) -> Vec<u64> {
-        assert!(arr.iter().all(|&x| x != 0));
-        let mut h = vec![0; arr.len()];
-        h[0] = arr[0] % self.prime;
-        for i in 1..arr.len() {
-            h[i] = (h[i - 1] + arr[i] * self.powr[i] % self.prime) % self.prime;
-        }
-        h
+    fn hash(&self, s: &[char]) -> Vec<u64> {
+        let h = (0..s.len())
+            .map(|i| (s[i] as u64) % self.p * self.powr[i] % self.p)
+            .collect::<Vec<_>>();
+        let pref = foldv(&h, |acc, x| (acc + x) % self.p);
+        pref
     }
 
     // l..r
     // rev(S[l..r]) = revS[(n - r)..(n - l)]
-    fn range(&self, h: &[u64], l: usize, r: usize) -> u64 {
-        assert!(l < h.len());
-        assert!(r <= h.len());
+    fn range(&self, pref: &[u64], l: usize, r: usize) -> u64 {
+        assert!(l < pref.len());
+        assert!(r <= pref.len());
         if l == r {
             0
         } else if l == 0 {
-            h[r - 1]
+            pref[r - 1]
         } else {
-            let ans = (self.prime + h[r - 1] - h[l - 1]) % self.prime * self.pinv[l] % self.prime;
-            ans
+            (self.p + pref[r - 1] - pref[l - 1]) % self.p * self.pinv[l] % self.p
         }
     }
 }
 
-fn read<T: std::str::FromStr>() -> T {
-    let mut s = String::new();
-    std::io::stdin().read_line(&mut s).ok();
-    s.trim().parse().ok().unwrap()
+struct PolyHasher2 {
+    hasher0: PolyHasher,
+    hasher1: PolyHasher,
 }
 
-fn readv<T: std::str::FromStr>() -> Vec<T> {
-    read::<String>()
-        .split_ascii_whitespace()
-        .map(|t| t.parse().ok().unwrap())
-        .collect()
-}
+impl PolyHasher2 {
+    fn new(n: usize) -> Self {
+        Self {
+            hasher0: PolyHasher::new(n, 31, 1_000_000_007),
+            hasher1: PolyHasher::new(n, 37, 1_000_000_009),
+        }
+    }
 
-fn reads() -> Vec<char> {
-    read::<String>().chars().collect::<Vec<char>>()
-}
+    fn hash(&self, arr: &[char]) -> (Vec<u64>, Vec<u64>) {
+        let pref0 = self.hasher0.hash(arr);
+        let pref1 = self.hasher1.hash(arr);
+        (pref0, pref1)
+    }
 
-fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
-    arr.iter().map(f).collect()
+    // l..r
+    // rev(S[l..r]) = revS[(n - r)..(n - l)]
+    fn range(&self, pref: &(Vec<u64>, Vec<u64>), l: usize, r: usize) -> (u64, u64) {
+        (
+            self.hasher0.range(&pref.0, l, r),
+            self.hasher1.range(&pref.1, l, r),
+        )
+    }
 }
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {
