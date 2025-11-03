@@ -1,7 +1,5 @@
 #![allow(unused)]
 
-use std::collections::BTreeSet;
-
 use proconio::input;
 use proconio::marker::*;
 
@@ -17,7 +15,7 @@ fn main() {
         adj[u].push(v);
     }
 
-    let (num_scc, belong) = tarjan_scc(&adj);
+    let (num_scc, belong) = TarjanSCC::from_adj(&adj);
     let mut sccs = vec![vec![]; num_scc];
     for u in 0..n {
         sccs[belong[u]].push(u);
@@ -34,8 +32,8 @@ struct TarjanSCC {
     order: usize,
     index: Vec<usize>,
     lowlink: Vec<usize>,
-    onstack: Vec<bool>,
     stack: Vec<usize>,
+    onstack: Vec<bool>,
     scc_id: usize,
     belong: Vec<usize>,
 }
@@ -57,43 +55,58 @@ impl TarjanSCC {
             }
         }
 
-        if self.lowlink[u] == self.index[u] {
-            while let Some(x) = self.stack.pop() {
-                self.onstack[x] = false;
-                self.belong[x] = self.scc_id;
-                if x == u {
+        if self.index[u] == self.lowlink[u] {
+            while let Some(v) = self.stack.pop() {
+                self.belong[v] = self.scc_id;
+                self.onstack[v] = false;
+                if v == u {
                     break;
                 }
             }
             self.scc_id += 1;
         }
     }
-}
 
-// https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
-// Returns:
-//    num_scc: number of scc
-//    belong: which scc each vertex belongs to
-// The order of scc is a *reversed* topological sort of the DAG.
-fn tarjan_scc(adj: &Vec<Vec<usize>>) -> (usize, Vec<usize>) {
-    let n = adj.len();
-    let mut data = TarjanSCC {
-        order: 0,
-        index: vec![!0; n],
-        lowlink: vec![0; n],
-        onstack: vec![false; n],
-        stack: vec![],
-        scc_id: 0,
-        belong: vec![!0; n],
-    };
-    for root in 0..n {
-        if data.index[root] == !0 {
-            data.dfs(root, adj);
+    fn from_adj(adj: &Vec<Vec<usize>>) -> (usize, Vec<usize>) {
+        let n = adj.len();
+        let mut data = TarjanSCC {
+            order: 0,
+            index: vec![!0; n],
+            lowlink: vec![!0; n],
+            stack: vec![],
+            onstack: vec![false; n],
+            scc_id: 0,
+            belong: vec![!0; n],
+        };
+        for u in 0..n {
+            if data.index[u] == !0 {
+                data.dfs(u, &adj);
+            }
         }
+        (data.scc_id, data.belong)
     }
-    (data.scc_id, data.belong)
 }
 
+fn read<T: std::str::FromStr>() -> T {
+    let mut s = String::new();
+    std::io::stdin().read_line(&mut s).ok();
+    s.trim().parse().ok().unwrap()
+}
+
+fn readv<T: std::str::FromStr>() -> Vec<T> {
+    read::<String>()
+        .split_ascii_whitespace()
+        .map(|t| t.parse().ok().unwrap())
+        .collect()
+}
+
+fn reads() -> Vec<char> {
+    read::<String>().chars().collect::<_>()
+}
+
+fn mapv<T, S, F: Fn(&T) -> S>(arr: &Vec<T>, f: F) -> Vec<S> {
+    arr.iter().map(f).collect()
+}
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {
     arr.iter()
