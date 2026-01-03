@@ -8,16 +8,13 @@ fn main() {
         nxt: [Usize1; n],
     }
 
-    let cycles = find_cycles_in_permutation_graph(&nxt);
-
-    let k = cycles.iter().map(|cycle| cycle.len() - 1).sum::<usize>();
-    println!("{k}");
-
-    for cycle in cycles {
-        for i in 1..cycle.len() {
-            println!("{} {}", cycle[0] + 1, cycle[i] + 1);
-        }
+    let mut ans = 0;
+    for cycle in find_cycles_in_permutation_graph(&nxt) {
+        let s = cycle.len() as i64;
+        ans += s * (s - 1) / 2;
     }
+
+    println!("{ans}");
 }
 
 fn find_cycles_in_permutation_graph(nxt: &Vec<usize>) -> Vec<Vec<usize>> {

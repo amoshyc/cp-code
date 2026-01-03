@@ -32,7 +32,7 @@ fn find_cycles_in_permutation_graph(nxt: &Vec<usize>) -> Vec<Vec<usize>> {
                 path.push(u);
                 u = nxt[u];
             }
-            cycles.push(path[idx[r]..].to_vec());
+            cycles.push(path);
         }
     }
     cycles

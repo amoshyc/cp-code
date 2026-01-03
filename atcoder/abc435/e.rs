@@ -2,15 +2,19 @@
 
 use std::collections::BTreeSet;
 
-use proconio::input;
+use proconio::{input, marker::Usize1};
 
 fn main() {
     input! {
         n: usize,
-        lr: [(usize, usize); n],
+        q: usize,
+        lr: [(usize, usize); q],
     }
 
+    let mut ans = vec![];
     let mut segs = BTreeSet::new();
+    let mut total = 0; // total length of the union
+
     for (l, r) in lr {
         let mut new_l = l;
         let mut new_r = r;
@@ -19,22 +23,18 @@ fn main() {
                 break;
             }
             segs.remove(&(b, a));
+            total -= b - a + 1;
             new_l = new_l.min(a);
             new_r = new_r.max(b);
         }
 
         segs.insert((new_r, new_l));
+        total += new_r - new_l + 1;
+
+        ans.push(n - total);
     }
 
-    let mut ans = segs.iter().map(|&(r, l)| (l, r)).collect::<Vec<_>>();
-    ans.sort();
-
-    let res = ans
-        .iter()
-        .map(|&(l, r)| format!("{} {}", l, r))
-        .collect::<Vec<_>>()
-        .join("\n");
-    println!("{}", res);
+    println!("{}", join(&ans, "\n"));
 }
 
 fn join<T: ToString>(arr: &[T], sep: &str) -> String {
