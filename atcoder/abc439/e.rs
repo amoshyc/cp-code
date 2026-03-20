@@ -10,7 +10,7 @@ fn main() {
     }
 
     // Tha problem is asking the longest chain that (A[i] < A[i + 1] and B[i] < B[i + 1]).
-    // which is the 2D Poset problem that can be solved using LIS or Sweep Line + BIT
+    // which is the 2D Poset problem that can be solved using LIS.
 
     ab.sort_by_key(|&(a, b)| (a, Reverse(b)));
     let bs = ab.iter().map(|&(a, b)| b).collect();
