@@ -1,28 +1,41 @@
 from collections import deque
 
 
-N, M = map(int, input().split())
+def topological_sort(adj):
+    N = len(adj)
+    indeg = [0 for _ in range(N)]
+    for u in range(N):
+        for v in adj[u]:
+            indeg[v] += 1
 
-in_deg = [0 for v in range(N)]
-graph = [[] for v in range(N)]
+    que = deque([u for u in range(N) if indeg[u] == 0])
+
+    sort = []
+    while len(que) > 0:
+        u = que.popleft()
+        sort.append(u)
+        for v in adj[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                que.append(v)
+
+    return sort
+
+
+N, M = map(int, input().split())
+adj = [[] for _ in range(N)]
 for _ in range(M):
     u, v = map(int, input().split())
     u, v = u - 1, v - 1
-    graph[u].append(v)
-    in_deg[v] += 1
+    adj[u].append(v)
 
+sort = topological_sort(adj)
 
-# dp[v] = length of the longest path ending at v
+# dp[u] = length of the longest path starting from u
+# dp[u] = max(dp[v] for v in adj[u]) + 1
 dp = [0 for _ in range(N)]
-
-# topological order
-que = deque([v for v, deg in enumerate(in_deg) if deg == 0])
-while len(que) > 0:
-    u = que.popleft()
-    for v in graph[u]:
-        dp[v] = max(dp[v], dp[u] + 1)
-        in_deg[v] -= 1
-        if in_deg[v] == 0:
-            que.append(v)
+for u in reversed(sort):
+    for v in adj[u]:
+        dp[u] = max(dp[u], dp[v] + 1)
 
 print(max(dp))
