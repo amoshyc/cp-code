@@ -63,10 +63,17 @@ if __name__ == "__main__":
     print("#submissions:", len(submissions))
     print("#new_items:", len(new_items))
 
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,"
+            " like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+    }
+
     for contest_id, problem_id, language, url in tqdm(new_items):
         tqdm.write(f"{contest_id} {problem_id} {language} {url}")
         
-        html = requests.get(url).content.decode("utf-8")
+        html = requests.get(url, headers=headers).content.decode("utf-8")
         code = etree.HTML(html).xpath('//pre[@id="submission-code"]/text()')[0]
         code = "\n".join(code.split("\r\n"))
 
